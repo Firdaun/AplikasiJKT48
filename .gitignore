@@ -1,0 +1,31 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# --- Tambahan ---
+
+# File Keystore (Kunci rahasia untuk merilis aplikasi ke Play Store)
+*.jks
+*.keystore
+keystore.properties
+
+# File konfigurasi layanan pihak ketiga (seperti Firebase)
+google-services.json
+
+# File Log / Catatan Error
+*.log
+
+# File bawaan sistem operasi lain (berjaga-jaga jika ada anggota tim pakai OS Windows/Mac)
+Thumbs.db
