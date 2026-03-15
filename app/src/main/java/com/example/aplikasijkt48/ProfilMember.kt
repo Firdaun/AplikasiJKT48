@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,11 +22,28 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun ProfilMember(nama: String, hobi: String, generasi: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.padding(20.dp)) {
-        Text(text = "Oshi akuh:")
-        Text(text = nama)
-        Text(text = "Hobi aku : $hobi")
-        Text(text = "Generasi : $generasi")
+    Card(
+        modifier = modifier.padding(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF5F5F5),
+            contentColor = Color.Black
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Nama aku : $nama",
+                fontSize = 14.sp
+            )
+            Text(
+                text = "Hobi aku : $hobi",
+                fontSize = 14.sp
+            )
+            Text(
+                text = "Generasi : $generasi",
+                fontSize = 14.sp
+            )
+        }
     }
 }
 
