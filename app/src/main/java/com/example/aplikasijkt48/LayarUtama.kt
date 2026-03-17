@@ -20,6 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +42,7 @@ import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 @Composable
 fun DesainLayarUtama() {
     val context = LocalContext.current
+    var fotoSaatIni by remember { mutableIntStateOf(R.drawable.fritzy_dimalamhari) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -106,7 +111,7 @@ fun DesainLayarUtama() {
                 )
             }
             Image(
-                painter = painterResource(id = R.drawable.fritzy_dimalamhari), // Sesuaikan id gambar
+                painter = painterResource(id = fotoSaatIni),
                 contentDescription = "Foto Bersama",
                 modifier = Modifier
                     .padding(start = 50.dp, end = 50.dp, bottom = 50.dp)
@@ -114,9 +119,20 @@ fun DesainLayarUtama() {
 
             )
             Button(
-                onClick = { Toast.makeText(context, "Hello Fahrul! Fritzy mewaro kamu loh \uD83D \uDC4B", Toast.LENGTH_SHORT).show()},
+                onClick = {
+                    fotoSaatIni = if (fotoSaatIni == R.drawable.fritzy_dimalamhari) {
+                        R.drawable.ic_launcher_background
+                    } else {
+                        R.drawable.fritzy_dimalamhari
+                    }
+                    Toast.makeText(
+                        context,
+                        "Tombol telah di ubah",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
                 modifier = Modifier
-                    .fillMaxWidth(0.6f)
+                    .fillMaxWidth(0.8f)
                     .height(50.dp),
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(
