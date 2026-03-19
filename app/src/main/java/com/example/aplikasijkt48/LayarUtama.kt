@@ -1,60 +1,65 @@
 package com.example.aplikasijkt48
 
+import android.content.res.Configuration
+import android.graphics.BlurMaskFilter
 import android.widget.Toast
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.toArgb
-import android.graphics.BlurMaskFilter
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.ui.draw.scale
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,57 +70,54 @@ fun DesainLayarUtama() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                modifier = Modifier.height(100.dp),
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxHeight()
-                    ) {
-                        LogoJKT48()
-                        Column(modifier = Modifier.padding(horizontal = 15.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "JKT48",
-                                    fontSize = 17.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    style = TextStyle(
-                                        platformStyle = PlatformTextStyle(
-                                            includeFontPadding = false
-                                        )
-                                    )
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                val warnaMedia = Color(0xFFF0244C)
-                                Text(
-                                    text = "MEDIA",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = warnaMedia,
-                                    modifier = Modifier
-                                        .background(
-                                            color = warnaMedia.copy(alpha = 0.15f),
-                                            shape = RoundedCornerShape(5.dp)
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            color = warnaMedia,
-                                            shape = RoundedCornerShape(5.dp)
-                                        )
-                                        .padding(horizontal = 6.dp, vertical = 2.dp),
-
-                                    style = TextStyle(
-                                        platformStyle = PlatformTextStyle(
-                                            includeFontPadding = false
-                                        )
-                                    )
-                                )
-                            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF07070F))
+                    .statusBarsPadding()
+                    .height(70.dp)
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LogoJKT48()
+                    Column(modifier = Modifier.padding(horizontal = 15.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                        ) {
                             Text(
-                                text = "Official Fan Gallery",
+                                text = "JKT48",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
                                 color = Color.White,
-                                fontSize = 13.sp,
+                                style = TextStyle(
+                                    platformStyle = PlatformTextStyle(
+                                        includeFontPadding = false
+                                    )
+                                )
+                            )
+                            val warnaMedia = Color(0xFFF0244C)
+                            Text(
+                                text = "MEDIA",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = warnaMedia,
+                                modifier = Modifier
+                                    .background(
+                                        color = warnaMedia.copy(alpha = 0.15f),
+                                        shape = RoundedCornerShape(5.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = warnaMedia,
+                                        shape = RoundedCornerShape(5.dp)
+                                    )
+                                    .padding(horizontal = 6.dp, vertical = 2.dp),
+
                                 style = TextStyle(
                                     platformStyle = PlatformTextStyle(
                                         includeFontPadding = false
@@ -123,22 +125,32 @@ fun DesainLayarUtama() {
                                 )
                             )
                         }
+                        Text(
+                            text = "Official Fan Gallery",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            style = TextStyle(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false
+                                )
+                            )
+                        )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF07070F)
-                )
-            )
+                }
+                Hamburger()
+            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize(),
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                horizontalArrangement = Arrangement.Center
+                modifier = Modifier.padding(vertical = 30.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
             ) {
                 ProfilMember(
                     nama = "Freya",
@@ -156,7 +168,7 @@ fun DesainLayarUtama() {
                 painter = painterResource(id = fotoSaatIni),
                 contentDescription = "Foto Bersama",
                 modifier = Modifier
-                    .padding(start = 50.dp, end = 50.dp, bottom = 50.dp)
+                    .padding(bottom = 50.dp)
                     .clip(RoundedCornerShape(20.dp))
 
             )
@@ -265,7 +277,53 @@ fun LogoJKT48(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun Hamburger() {
+    var isOpen by remember { mutableStateOf(false) }
+    val topRound by animateFloatAsState(targetValue = if (isOpen) 45f else 0f)
+    val bottomRound by animateFloatAsState(targetValue = if (isOpen) -45f else 0f)
+
+    val swipeUp by animateDpAsState(targetValue = if (isOpen) 8.dp else 0.dp)
+    val swipeBottom by animateDpAsState(targetValue = if (isOpen) (-8).dp else 0.dp)
+
+    val transparantCenter by animateFloatAsState(targetValue = if (isOpen) 0f else 1f)
+
+    Column(
+        modifier = Modifier
+            .clickable { isOpen = !isOpen },
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .offset(y = swipeUp)
+                .rotate(topRound)
+                .size(width = 24.dp, height = 2.dp)
+                .background(Color.White, RoundedCornerShape(2.dp))
+        )
+        Box(
+            modifier = Modifier
+                .alpha(transparantCenter)
+                .size(width = 24.dp, height = 2.dp)
+                .background(Color.White, RoundedCornerShape(2.dp))
+        )
+        Box(
+            modifier = Modifier
+                .offset(y = swipeBottom)
+                .rotate(bottomRound)
+                .size(width = 24.dp, height = 2.dp)
+                .background(Color.White, RoundedCornerShape(2.dp))
+        )
+
+    }
+}
+
+@Preview(
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = Devices.PIXEL_6_PRO
+)
 @Composable
 fun DesainLayarUtamaPreview() {
     AplikasiJKT48Theme {

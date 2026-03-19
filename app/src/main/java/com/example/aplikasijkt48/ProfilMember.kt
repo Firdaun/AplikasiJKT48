@@ -21,9 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ProfilMember(nama: String, hobi: String, generasi: String, modifier: Modifier = Modifier) {
+fun ProfilMember(nama: String, hobi: String, generasi: String) {
     Card(
-        modifier = modifier.padding(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF5F5F5),
             contentColor = Color.Black
