@@ -1,6 +1,14 @@
 package com.example.aplikasijkt48.components
 
+import android.content.res.Configuration
+import android.graphics.BlurMaskFilter
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,21 +36,29 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.aplikasijkt48.R
+import com.example.aplikasijkt48.DesainLayarUtama
+import com.example.aplikasijkt48.data.GalleryData
+import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 
-data class MemberProfile(val name: String, val team: String, val imageResId: Int)
 data class TeamStyle(val color: Color, val gradientEnd: Color)
 
 val teamStyles = mapOf(
@@ -50,15 +66,6 @@ val teamStyles = mapOf(
     "passion" to TeamStyle(Color(0xFFFFD700), Color(0xFFFFEB73)),
     "dream" to TeamStyle(Color(0xFF00D4FF), Color(0xFF7DF9FF)),
     "trainee" to TeamStyle(Color(0xFF94A3B8), Color(0xFFCBD5E1))
-)
-
-val dummyMembers = listOf(
-    MemberProfile("freya", "dream", R.drawable.ic_launcher_background),
-    MemberProfile("christy", "passion", R.drawable.ic_launcher_background),
-    MemberProfile("fritzy", "love", R.drawable.ic_launcher_background),
-    MemberProfile("ekin", "trainee", R.drawable.ic_launcher_background),
-    MemberProfile("muthe", "passion", R.drawable.ic_launcher_background),
-    MemberProfile("marsha", "dream", R.drawable.ic_launcher_background)
 )
 
 @Composable
@@ -73,7 +80,7 @@ fun StoryCarousel(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 10.dp),
+                .padding(bottom = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
@@ -172,13 +179,32 @@ fun StoryCarousel(
             contentPadding = PaddingValues(horizontal = 5.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(dummyMembers) { member ->
+            items(GalleryData.photoProfile) { member ->
                 val isActive = activeMember == member.name
                 val style = teamStyles[member.team] ?: teamStyles["love"]!!
 
                 val scale by animateFloatAsState(
                     targetValue = if (isActive) 1.1f else 1.0f,
                     label = "scale"
+                )
+                val infiniteTransition = rememberInfiniteTransition(label = "glow_transition")
+                val glowRadius by infiniteTransition.animateFloat(
+                    initialValue = 28f,
+                    targetValue = 35f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1250, easing = FastOutSlowInEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "glow_radius"
+                )
+                val glowAlpha by infiniteTransition.animateFloat(
+                    initialValue = 0.4f,
+                    targetValue = 0.8f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1250, easing = FastOutSlowInEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "glow_alpha"
                 )
                 val interactionSource = remember { MutableInteractionSource() }
                 Column(
@@ -193,7 +219,24 @@ fun StoryCarousel(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(65.dp)
+                            .size(68.dp)
+                            .drawBehind{
+                                if (isActive) {
+                                    drawIntoCanvas { canvas ->
+                                        val paint = Paint()
+                                        val frameworkPaint = paint.asFrameworkPaint()
+                                        val titikTengah = Offset(size.width / 2, size.height / 2)
+                                        val radiusLingkaran = (size.width / 2) + 2f
+                                        frameworkPaint.color = style.color.copy(alpha = glowAlpha * 0.9f).toArgb()
+                                        frameworkPaint.maskFilter = BlurMaskFilter(glowRadius, BlurMaskFilter.Blur.NORMAL)
+                                        canvas.drawCircle(titikTengah, radiusLingkaran, paint)
+
+                                        frameworkPaint.color = style.color.copy(alpha = (glowAlpha * 0.9f)).toArgb()
+                                        frameworkPaint.maskFilter = BlurMaskFilter(glowRadius * 0.5f, BlurMaskFilter.Blur.NORMAL)
+                                        canvas.drawCircle(titikTengah, radiusLingkaran, paint)
+                                    }
+                                }
+                            }
                             .background(
                                 brush = if (isActive) Brush.linearGradient(
                                     listOf(
@@ -256,5 +299,17 @@ fun StoryCarousel(
                 }
             }
         }
+    }
+}
+@Preview(
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = Devices.PIXEL_6_PRO
+)
+@Composable
+fun Preview() {
+    AplikasiJKT48Theme {
+        DesainLayarUtama()
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -20,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
+import android.util.Log
+import androidx.compose.material3.Text
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +47,26 @@ fun DesainLayarUtama() {
                     activeMemberName = namaMember
                 }
             )
+            var uangBy by remember { mutableStateOf(1000) }
+
+            // 2. Uji coba pakai '=' (Pegang Brankas langsung)
+            val ingat = remember { mutableStateOf(1000) }
+
+            Button(
+                onClick = {
+                    // Kita ubah nilainya
+                    uangBy = uangBy + 500
+                    ingat.value = ingat.value + 500
+
+                    // KITA PRINT KE TERMINAL (LOGCAT)
+                    // Formatnya: Log.d("NAMA_TAG", "Pesan yang mau di-print")
+                    Log.d("TEST_FAHRUL", "Nilai uangBy sekarang: $uangBy")
+                    Log.d("TEST_FAHRUL", "Nilai uangSamaDengan sekarang: ${ingat.value}")
+                },
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Text("Cek Console Log (Logcat)!")
+            }
         }
     }
 }
