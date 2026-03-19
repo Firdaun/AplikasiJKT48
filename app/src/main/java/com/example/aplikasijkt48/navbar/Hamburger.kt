@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,10 +33,15 @@ fun Hamburger() {
     val swipeBottom by animateDpAsState(targetValue = if (isOpen) (-8).dp else 0.dp)
 
     val transparantCenter by animateFloatAsState(targetValue = if (isOpen) 0f else 1f)
-
+    val interactionSource = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
-            .clickable { isOpen = !isOpen },
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = { isOpen = !isOpen  }
+
+),
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

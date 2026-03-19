@@ -29,7 +29,7 @@ fun TopNavbar(){
             .background(Color(0xFF07070F))
             .statusBarsPadding()
             .height(70.dp)
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 13.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
