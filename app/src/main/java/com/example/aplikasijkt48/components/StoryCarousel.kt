@@ -27,19 +27,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Color
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Paint
@@ -47,6 +51,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -73,6 +79,31 @@ fun StoryCarousel(
     activeMember: String,
     onSelectMember: (String) -> Unit
 ) {
+    val totalData = GalleryData.photoProfile.size
+    val startIndex = (Int.MAX_VALUE / 2) - ((Int.MAX_VALUE / 2) % totalData)
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = startIndex)
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val density = LocalDensity.current
+    val centerOffsetPx = with(density) { ((screenWidth / 2) - 51.5.dp).toPx().toInt() }
+    LaunchedEffect(activeMember) {
+        val targetRealIndex = GalleryData.photoProfile.indexOfFirst { it.name == activeMember }
+        if (targetRealIndex != -1) {
+            val currentVirtualIndex = listState.firstVisibleItemIndex
+            val currentRealIndex = currentVirtualIndex % totalData
+            val distance = targetRealIndex - currentRealIndex
+            val shortestDistance = when {
+                distance > totalData / 2 -> distance - totalData
+                distance < -totalData / 2 -> distance + totalData
+                else -> distance
+            }
+            val targetVirtualIndex = currentVirtualIndex + shortestDistance
+
+            listState.animateScrollToItem(
+                index = targetVirtualIndex,
+                scrollOffset = -centerOffsetPx
+            )
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -175,11 +206,16 @@ fun StoryCarousel(
             }
         }
         LazyRow(
+            state = listState,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(horizontal = 5.dp),
+            contentPadding = PaddingValues(start = 5.dp, end = 5.dp, top = 13.dp, bottom = 10.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(GalleryData.photoProfile) { member ->
+            items(count = Int.MAX_VALUE) { i ->
+
+                val realIndex = i % GalleryData.photoProfile.size
+                val member = GalleryData.photoProfile[realIndex]
+
                 val isActive = activeMember == member.name
                 val style = teamStyles[member.team] ?: teamStyles["love"]!!
 
@@ -188,24 +224,49 @@ fun StoryCarousel(
                     label = "scale"
                 )
                 val infiniteTransition = rememberInfiniteTransition(label = "glow_transition")
-                val glowRadius by infiniteTransition.animateFloat(
-                    initialValue = 28f,
-                    targetValue = 35f,
+                val glowSpread by infiniteTransition.animateFloat(
+                    initialValue = 1f,
+                    targetValue = 3f,
                     animationSpec = infiniteRepeatable(
                         animation = tween(1250, easing = FastOutSlowInEasing),
                         repeatMode = RepeatMode.Reverse
                     ),
-                    label = "glow_radius"
+                    label = "glow_spread"
                 )
+
+                // 2. Animasi Blur Medium (16px ke 24px)
+                val glowBlurMedium by infiniteTransition.animateFloat(
+                    initialValue = 16f,
+                    targetValue = 24f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1250, easing = FastOutSlowInEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "glow_blur_medium"
+                )
+
+                // 3. Animasi Blur Luar (32px ke 48px)
+                val glowBlurLarge by infiniteTransition.animateFloat(
+                    initialValue = 32f,
+                    targetValue = 48f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1250, easing = FastOutSlowInEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "glow_blur_large"
+                )
+
+                // 4. Animasi Opacity Blur Luar (0.5 ke 0.7)
                 val glowAlpha by infiniteTransition.animateFloat(
                     initialValue = 0.4f,
-                    targetValue = 0.8f,
+                    targetValue = 0.7f,
                     animationSpec = infiniteRepeatable(
                         animation = tween(1250, easing = FastOutSlowInEasing),
                         repeatMode = RepeatMode.Reverse
                     ),
                     label = "glow_alpha"
                 )
+
                 val interactionSource = remember { MutableInteractionSource() }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -220,20 +281,40 @@ fun StoryCarousel(
                     Box(
                         modifier = Modifier
                             .size(68.dp)
-                            .drawBehind{
+                            .drawBehind {
                                 if (isActive) {
                                     drawIntoCanvas { canvas ->
                                         val paint = Paint()
                                         val frameworkPaint = paint.asFrameworkPaint()
-                                        val titikTengah = Offset(size.width / 2, size.height / 2)
-                                        val radiusLingkaran = (size.width / 2) + 2f
-                                        frameworkPaint.color = style.color.copy(alpha = glowAlpha * 0.9f).toArgb()
-                                        frameworkPaint.maskFilter = BlurMaskFilter(glowRadius, BlurMaskFilter.Blur.NORMAL)
-                                        canvas.drawCircle(titikTengah, radiusLingkaran, paint)
 
-                                        frameworkPaint.color = style.color.copy(alpha = (glowAlpha * 0.9f)).toArgb()
-                                        frameworkPaint.maskFilter = BlurMaskFilter(glowRadius * 0.5f, BlurMaskFilter.Blur.NORMAL)
-                                        canvas.drawCircle(titikTengah, radiusLingkaran, paint)
+                                        val titikTengah = Offset(size.width / 2, size.height / 2)
+                                        val radiusDasar = (size.width / 2) + 2f
+
+                                        frameworkPaint.color =
+                                            style.color.copy(alpha = glowAlpha).toArgb()
+                                        frameworkPaint.maskFilter = BlurMaskFilter(
+                                            glowBlurLarge,
+                                            BlurMaskFilter.Blur.NORMAL
+                                        )
+                                        canvas.drawCircle(titikTengah, radiusDasar, paint)
+
+                                        // LAYER 2: Blur Inti (0 0 16px Solid) -> Membesar ke 24px
+                                        frameworkPaint.color = style.color.toArgb()
+                                        frameworkPaint.maskFilter = BlurMaskFilter(
+                                            glowBlurMedium,
+                                            BlurMaskFilter.Blur.NORMAL
+                                        )
+                                        canvas.drawCircle(titikTengah, radiusDasar, paint)
+
+                                        // LAYER 1: Cincin Solid Berdenyut (0 0 0 2px) -> Membesar ke 3px
+                                        frameworkPaint.color = style.color.toArgb()
+                                        frameworkPaint.maskFilter =
+                                            null // Matikan blur untuk membuat garis cincin solid
+                                        canvas.drawCircle(
+                                            titikTengah,
+                                            radiusDasar + glowSpread,
+                                            paint
+                                        )
                                     }
                                 }
                             }
@@ -246,7 +327,7 @@ fun StoryCarousel(
                                 ) else SolidColor(Color.White.copy(alpha = 0.12f)),
                                 shape = CircleShape
                             )
-                            .padding(3.dp)
+                            .padding(2.dp)
                             .background(
                                 if (isActive) Color(0xFF07070F) else Color.Transparent,
                                 CircleShape
@@ -259,11 +340,11 @@ fun StoryCarousel(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(CircleShape),
+                                .clip(CircleShape)
+                                .alpha(if (isActive) 1f else 0.55f),
+
                             colorFilter = if (!isActive) ColorFilter.colorMatrix(ColorMatrix().apply {
-                                setToSaturation(
-                                    0f
-                                )
+                                setToSaturation(0.8f)
                             }) else null
                         )
                     }
@@ -301,6 +382,7 @@ fun StoryCarousel(
         }
     }
 }
+
 @Preview(
     showBackground = true,
     showSystemUi = true,
