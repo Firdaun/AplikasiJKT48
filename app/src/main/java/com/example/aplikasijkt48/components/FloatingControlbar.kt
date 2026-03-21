@@ -61,17 +61,13 @@ fun FloatingControlBar(
     onClear: () -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
-    // Cek apakah layar berukuran Tablet (di atas 768dp)
     val isTablet = configuration.screenWidthDp > 768
-
-    // Pengaturan ukuran dinamis
     val containerPadding = if (isTablet) 24.dp else 12.dp
     val borderRadius = if (isTablet) 16.dp else 12.dp
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            // Glassmorphism effect: bg-white/5, border-white/10
             .clip(RoundedCornerShape(borderRadius))
             .background(Color.White.copy(alpha = 0.05f))
             .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(borderRadius))
@@ -117,7 +113,12 @@ fun FloatingControlBar(
 // 1. KOMPONEN TOGGLE ALBUM & GRID
 // ==========================================
 @Composable
-fun ToggleGroup(viewMode: String, onViewModeChange: (String) -> Unit, isTablet: Boolean, modifier: Modifier = Modifier) {
+fun ToggleGroup(
+    viewMode: String,
+    onViewModeChange: (String) -> Unit,
+    isTablet: Boolean,
+    modifier: Modifier = Modifier
+) {
     val fontSize = if (isTablet) 12.sp else 10.sp
     val iconSize = if (isTablet) 14.dp else 12.dp
 
@@ -134,7 +135,6 @@ fun ToggleGroup(viewMode: String, onViewModeChange: (String) -> Unit, isTablet: 
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(50))
                 .drawBehind { // Efek shadow glow merah
                     if (isAlbum) {
                         drawIntoCanvas { canvas ->
@@ -146,6 +146,7 @@ fun ToggleGroup(viewMode: String, onViewModeChange: (String) -> Unit, isTablet: 
                         }
                     }
                 }
+                .clip(RoundedCornerShape(50))
                 .background(
                     if (isAlbum) Brush.linearGradient(listOf(Color(0xFFEE1D52), Color(0xFFC01240)))
                     else SolidColor(Color.Transparent)
@@ -165,7 +166,6 @@ fun ToggleGroup(viewMode: String, onViewModeChange: (String) -> Unit, isTablet: 
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(50))
                 .drawBehind { // Efek shadow glow biru
                     if (isGrid) {
                         drawIntoCanvas { canvas ->
@@ -177,6 +177,7 @@ fun ToggleGroup(viewMode: String, onViewModeChange: (String) -> Unit, isTablet: 
                         }
                     }
                 }
+                .clip(RoundedCornerShape(50))
                 .background(
                     if (isGrid) Brush.linearGradient(listOf(Color(0xFF00D4FF), Color(0xFF0099BB)))
                     else SolidColor(Color.Transparent)

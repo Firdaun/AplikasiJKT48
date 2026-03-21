@@ -24,6 +24,8 @@ import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 import android.util.Log
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import com.example.aplikasijkt48.components.FloatingControlBar
 
@@ -44,6 +46,7 @@ fun DesainLayarUtama() {
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(horizontal = 13.dp, vertical = 20.dp)
+                .verticalScroll(rememberScrollState())
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
