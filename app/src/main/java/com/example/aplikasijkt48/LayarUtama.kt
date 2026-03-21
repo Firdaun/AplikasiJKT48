@@ -22,7 +22,10 @@ import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 import android.util.Log
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
+import com.example.aplikasijkt48.components.FloatingControlBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +36,10 @@ fun DesainLayarUtama() {
             TopNavbar()
         }
     ) { innerPadding ->
-        var activeMemberName by remember { mutableStateOf("freya") }
+        var activeMemberName by remember { mutableStateOf("") }
+        var viewMode by remember { mutableStateOf("album") }
+        var activePlatform by remember { mutableStateOf("all") }
+        var searchQuery by remember { mutableStateOf("") }
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -47,19 +53,26 @@ fun DesainLayarUtama() {
                     activeMemberName = namaMember
                 }
             )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            FloatingControlBar(
+                viewMode = viewMode,
+                onViewModeChange = { viewMode = it },
+                activePlatform = activePlatform,
+                onPlatformChange = { activePlatform = it },
+                searchQuery = searchQuery,
+                onSearchChange = { searchQuery = it },
+                onClear = { searchQuery = "" }
+            )
             var uangBy by remember { mutableStateOf(1000) }
 
-            // 2. Uji coba pakai '=' (Pegang Brankas langsung)
             val ingat = remember { mutableStateOf(1000) }
 
             Button(
                 onClick = {
-                    // Kita ubah nilainya
                     uangBy = uangBy + 500
                     ingat.value = ingat.value + 500
 
-                    // KITA PRINT KE TERMINAL (LOGCAT)
-                    // Formatnya: Log.d("NAMA_TAG", "Pesan yang mau di-print")
                     Log.d("TEST_FAHRUL", "Nilai uangBy sekarang: $uangBy")
                     Log.d("TEST_FAHRUL", "Nilai uangSamaDengan sekarang: ${ingat.value}")
                 },

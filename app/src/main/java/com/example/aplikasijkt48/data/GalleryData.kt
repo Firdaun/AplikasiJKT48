@@ -9,6 +9,8 @@ data class MemberProfile(
 )
 
 object GalleryData {
+    private val teamOrder = mapOf("passion" to 1, "dream" to 2, "love" to 3, "trainee" to 4)
+
     val photoProfile = listOf(
         // === TIM DREAM ===
         MemberProfile(imageResId = R.drawable.kabesha_adeline_wijaya,       name = "delynn",    team = "dream"),
@@ -71,5 +73,9 @@ object GalleryData {
         MemberProfile(imageResId = R.drawable.kabesha_jemima_evodie,        name = "jemima",    team = "trainee"),
         MemberProfile(imageResId = R.drawable.kabesha_mikaela_kusjanto,     name = "mikaela",   team = "trainee"),
         MemberProfile(imageResId = R.drawable.kabesha_nur_intan,            name = "intan",     team = "trainee")
+    ).sortedWith(
+        // 2. Terjemahan logikamu: Urutkan Tim dulu, baru urutkan Nama A-Z
+        compareBy<MemberProfile> { teamOrder[it.team] ?: 5 }
+            .thenBy { it.name }
     )
 }

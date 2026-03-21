@@ -84,7 +84,7 @@ fun StoryCarousel(
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = startIndex)
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val density = LocalDensity.current
-    val centerOffsetPx = with(density) { ((screenWidth / 2) - 51.5.dp).toPx().toInt() }
+    val centerOffsetPx = with(density) { ((screenWidth / 2) - 48.dp).toPx().toInt() }
     LaunchedEffect(activeMember) {
         val targetRealIndex = GalleryData.photoProfile.indexOfFirst { it.name == activeMember }
         if (targetRealIndex != -1) {
@@ -208,7 +208,7 @@ fun StoryCarousel(
         LazyRow(
             state = listState,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(start = 5.dp, end = 5.dp, top = 13.dp, bottom = 10.dp),
+            contentPadding = PaddingValues(top = 12.dp, bottom = 10.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             items(count = Int.MAX_VALUE) { i ->
@@ -234,7 +234,6 @@ fun StoryCarousel(
                     label = "glow_spread"
                 )
 
-                // 2. Animasi Blur Medium (16px ke 24px)
                 val glowBlurMedium by infiniteTransition.animateFloat(
                     initialValue = 16f,
                     targetValue = 24f,
@@ -245,7 +244,6 @@ fun StoryCarousel(
                     label = "glow_blur_medium"
                 )
 
-                // 3. Animasi Blur Luar (32px ke 48px)
                 val glowBlurLarge by infiniteTransition.animateFloat(
                     initialValue = 32f,
                     targetValue = 48f,
@@ -256,7 +254,6 @@ fun StoryCarousel(
                     label = "glow_blur_large"
                 )
 
-                // 4. Animasi Opacity Blur Luar (0.5 ke 0.7)
                 val glowAlpha by infiniteTransition.animateFloat(
                     initialValue = 0.4f,
                     targetValue = 0.7f,
@@ -298,7 +295,6 @@ fun StoryCarousel(
                                         )
                                         canvas.drawCircle(titikTengah, radiusDasar, paint)
 
-                                        // LAYER 2: Blur Inti (0 0 16px Solid) -> Membesar ke 24px
                                         frameworkPaint.color = style.color.toArgb()
                                         frameworkPaint.maskFilter = BlurMaskFilter(
                                             glowBlurMedium,
@@ -306,10 +302,9 @@ fun StoryCarousel(
                                         )
                                         canvas.drawCircle(titikTengah, radiusDasar, paint)
 
-                                        // LAYER 1: Cincin Solid Berdenyut (0 0 0 2px) -> Membesar ke 3px
                                         frameworkPaint.color = style.color.toArgb()
                                         frameworkPaint.maskFilter =
-                                            null // Matikan blur untuk membuat garis cincin solid
+                                            null
                                         canvas.drawCircle(
                                             titikTengah,
                                             radiusDasar + glowSpread,
