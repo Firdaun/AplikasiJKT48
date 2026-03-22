@@ -135,7 +135,7 @@ fun ToggleGroup(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .drawBehind { // Efek shadow glow merah
+                .drawBehind {
                     if (isAlbum) {
                         drawIntoCanvas { canvas ->
                             val paint = Paint()
@@ -166,7 +166,7 @@ fun ToggleGroup(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .drawBehind { // Efek shadow glow biru
+                .drawBehind {
                     if (isGrid) {
                         drawIntoCanvas { canvas ->
                             val paint = Paint()
@@ -216,7 +216,7 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
                 contentAlignment = Alignment.Center
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 3.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
@@ -294,7 +294,16 @@ fun SearchBar(searchQuery: String, onSearchChange: (String) -> Unit, onClear: ()
                 .onFocusChanged { isFocused = it.isFocused }, // Deteksi kursor masuk
             decorationBox = { innerTextField ->
                 if (searchQuery.isEmpty()) {
-                    Text("Search members…", color = Color.White.copy(0.4f), fontSize = fontSize)
+                    Text(
+                        text = "Search members…",
+                        color = Color.White.copy(0.4f),
+                        fontSize = fontSize,
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(
+                                includeFontPadding = false
+                            )
+                        )
+                    )
                 }
                 innerTextField()
             }

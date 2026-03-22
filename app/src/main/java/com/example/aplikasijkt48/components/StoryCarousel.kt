@@ -111,35 +111,35 @@ fun StoryCarousel(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp),
+                .padding(bottom = 5.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
                 Text(
                     text = "Updated Nov 10, 2026",
                     color = Color(0xFF00D4FF),
-                    fontSize = 10.sp,
+                    fontSize = 8.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .background(Color(0xFF00D4FF).copy(alpha = 0.08f), RoundedCornerShape(50))
                         .border(1.dp, Color(0xFF00D4FF).copy(alpha = 0.2f), RoundedCornerShape(50))
-                        .padding(horizontal = 12.dp, vertical = 3.dp)
+                        .padding(horizontal = 10.dp, vertical = 2.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Media Gallery",
                     color = Color.White,
-                    fontSize = 36.sp,
+                    fontSize = 33.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    lineHeight = 40.sp,
+                    lineHeight = 35.sp,
                     style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                 )
                 Row {
                     Text(
                         text = "JKT48",
-                        fontSize = 36.sp,
+                        fontSize = 33.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        lineHeight = 40.sp,
+                        lineHeight = 35.sp,
                         style = TextStyle(
                             brush = Brush.linearGradient(
                                 colors = listOf(
@@ -155,9 +155,9 @@ fun StoryCarousel(
                     Text(
                         text = "Official",
                         color = Color.White.copy(alpha = 0.35f),
-                        fontSize = 36.sp,
+                        fontSize = 33.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        lineHeight = 40.sp,
+                        lineHeight = 35.sp,
                         style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                     )
                 }
@@ -168,13 +168,13 @@ fun StoryCarousel(
                     Text(
                         text = "10,245",
                         color = Color(0xFF00D4FF),
-                        fontSize = 20.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
                         text = "TOTAL MEDIA",
                         color = Color.White.copy(alpha = 0.35f),
-                        fontSize = 10.sp,
+                        fontSize = 8.sp,
                         fontWeight = FontWeight.SemiBold,
                         style = TextStyle(
                             platformStyle = PlatformTextStyle(
@@ -187,13 +187,13 @@ fun StoryCarousel(
                     Text(
                         text = "40",
                         color = Color(0xFFA855F7),
-                        fontSize = 20.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
                         text = "MEMBERS",
                         color = Color.White.copy(alpha = 0.35f),
-                        fontSize = 10.sp,
+                        fontSize = 8.sp,
                         fontWeight = FontWeight.SemiBold,
                         style = TextStyle(
                             platformStyle = PlatformTextStyle(

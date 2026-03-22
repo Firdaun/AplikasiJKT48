@@ -38,7 +38,7 @@ fun DesainLayarUtama() {
             TopNavbar()
         }
     ) { innerPadding ->
-        var activeMemberName by remember { mutableStateOf("") }
+        var activeMemberName by remember { mutableStateOf("christy") }
         var viewMode by remember { mutableStateOf("album") }
         var activePlatform by remember { mutableStateOf("all") }
         var searchQuery by remember { mutableStateOf("") }
