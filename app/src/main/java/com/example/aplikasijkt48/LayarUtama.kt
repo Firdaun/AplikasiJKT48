@@ -1,11 +1,15 @@
 package com.example.aplikasijkt48
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -18,16 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.aplikasijkt48.components.FloatingControlBar
 import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
-import android.util.Log
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
-import com.example.aplikasijkt48.components.FloatingControlBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,22 +65,30 @@ fun DesainLayarUtama() {
                 onSearchChange = { searchQuery = it },
                 onClear = { searchQuery = "" }
             )
-            var uangBy by remember { mutableStateOf(1000) }
 
-            val ingat = remember { mutableStateOf(1000) }
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Button(
-                onClick = {
-                    uangBy = uangBy + 500
-                    ingat.value = ingat.value + 500
+            // --- DATA DUMMY SEMENTARA UNTUK TEST VISUAL ---
+            val contohData = com.example.aplikasijkt48.components.GalleryItem(
+                platform = "Instagram",
+                isVideo = false,
+                image = "https://picsum.photos/400/600", // Gambar random dari internet
+                caption = "Halo semuanya! Tadi theater seru banget loh, terima kasih yang sudah datang ya! ❤️",
+                date = "22 MAR 2026",
+                member = "Christy"
+            )
 
-                    Log.d("TEST_FAHRUL", "Nilai uangBy sekarang: $uangBy")
-                    Log.d("TEST_FAHRUL", "Nilai uangSamaDengan sekarang: ${ingat.value}")
+            // --- PANGGIL KARTU YANG BARU KITA BUAT ---
+            com.example.aplikasijkt48.components.GalleryCard(
+                item = contohData,
+                onClick = { diklik ->
+                    Log.d("TEST_KLIK", "Kartu ${diklik.member} diklik!")
                 },
-                modifier = Modifier.padding(20.dp)
-            ) {
-                Text("Cek Console Log (Logcat)!")
-            }
+                // Atur lebarnya agar tidak terlalu besar kalau di HP (karena ini baru 1 kartu)
+                modifier = Modifier.fillMaxWidth(0.6f)
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }
