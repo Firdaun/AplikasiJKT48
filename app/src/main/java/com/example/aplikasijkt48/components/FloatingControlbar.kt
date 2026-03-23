@@ -74,7 +74,6 @@ fun FloatingControlBar(
             .padding(horizontal = containerPadding, vertical = 16.dp)
     ) {
         if (isTablet) {
-            // === LAYOUT TABLET (1 Baris Lurus) ===
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,7 +84,6 @@ fun FloatingControlBar(
                 SearchBar(searchQuery, onSearchChange, onClear, isTablet, Modifier.width(280.dp))
             }
         } else {
-            // === LAYOUT MOBILE (2 Baris) ===
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -94,7 +92,6 @@ fun FloatingControlBar(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    // Lebarnya dibagi 50% - 50% menggunakan weight(1f)
                     ToggleGroup(viewMode, onViewModeChange, isTablet, Modifier.weight(1f))
                     SearchBar(searchQuery, onSearchChange, onClear, isTablet, Modifier.weight(1f))
                 }
@@ -109,9 +106,6 @@ fun FloatingControlBar(
     }
 }
 
-// ==========================================
-// 1. KOMPONEN TOGGLE ALBUM & GRID
-// ==========================================
 @Composable
 fun ToggleGroup(
     viewMode: String,
@@ -129,7 +123,6 @@ fun ToggleGroup(
             .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
             .padding(4.dp)
     ) {
-        // Tombol Album
         val isAlbum = viewMode == "album"
         Box(
             modifier = Modifier
@@ -141,8 +134,17 @@ fun ToggleGroup(
                             val paint = Paint()
                             val frameworkPaint = paint.asFrameworkPaint()
                             frameworkPaint.color = Color(0xFFEE1D52).copy(alpha = 0.4f).toArgb()
-                            frameworkPaint.maskFilter = BlurMaskFilter(16f, BlurMaskFilter.Blur.NORMAL)
-                            canvas.drawRoundRect(0f, 10f, size.width, size.height + 10f, 50f, 50f, paint)
+                            frameworkPaint.maskFilter =
+                                BlurMaskFilter(16f, BlurMaskFilter.Blur.NORMAL)
+                            canvas.drawRoundRect(
+                                0f,
+                                10f,
+                                size.width,
+                                size.height + 10f,
+                                50f,
+                                50f,
+                                paint
+                            )
                         }
                     }
                 }
@@ -154,13 +156,25 @@ fun ToggleGroup(
                 .clickable { onViewModeChange("album") },
             contentAlignment = Alignment.Center
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Icon(Icons.AutoMirrored.Filled.MenuBook, "Album", Modifier.size(iconSize), tint = if (isAlbum) Color.White else Color.White.copy(0.45f))
-                Text("Album", color = if (isAlbum) Color.White else Color.White.copy(0.45f), fontSize = fontSize, fontWeight = FontWeight.SemiBold)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.MenuBook,
+                    "Album",
+                    Modifier.size(iconSize),
+                    tint = if (isAlbum) Color.White else Color.White.copy(0.45f)
+                )
+                Text(
+                    "Album",
+                    color = if (isAlbum) Color.White else Color.White.copy(0.45f),
+                    fontSize = fontSize,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
 
-        // Tombol Grid
         val isGrid = viewMode == "grid"
         Box(
             modifier = Modifier
@@ -172,8 +186,17 @@ fun ToggleGroup(
                             val paint = Paint()
                             val frameworkPaint = paint.asFrameworkPaint()
                             frameworkPaint.color = Color(0xFF00D4FF).copy(alpha = 0.35f).toArgb()
-                            frameworkPaint.maskFilter = BlurMaskFilter(16f, BlurMaskFilter.Blur.NORMAL)
-                            canvas.drawRoundRect(0f, 10f, size.width, size.height + 10f, 50f, 50f, paint)
+                            frameworkPaint.maskFilter =
+                                BlurMaskFilter(16f, BlurMaskFilter.Blur.NORMAL)
+                            canvas.drawRoundRect(
+                                0f,
+                                10f,
+                                size.width,
+                                size.height + 10f,
+                                50f,
+                                50f,
+                                paint
+                            )
                         }
                     }
                 }
@@ -185,17 +208,27 @@ fun ToggleGroup(
                 .clickable { onViewModeChange("grid") },
             contentAlignment = Alignment.Center
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Icon(Icons.Default.GridView, "Grid", Modifier.size(iconSize), tint = if (isGrid) Color.White else Color.White.copy(0.45f))
-                Text("Grid", color = if (isGrid) Color.White else Color.White.copy(0.45f), fontSize = fontSize, fontWeight = FontWeight.SemiBold)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    Icons.Default.GridView,
+                    "Grid",
+                    Modifier.size(iconSize),
+                    tint = if (isGrid) Color.White else Color.White.copy(0.45f)
+                )
+                Text(
+                    "Grid",
+                    color = if (isGrid) Color.White else Color.White.copy(0.45f),
+                    fontSize = fontSize,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
 }
 
-// ==========================================
-// 2. KOMPONEN PLATFORM FILTER (ALL, IG, X)
-// ==========================================
 @Composable
 fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, isTablet: Boolean) {
     val fontSize = if (isTablet) 12.sp else 10.5.sp
@@ -205,7 +238,10 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
         Triple("twitter", "X/Twitter", Icons.Default.Close)
     )
 
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         platforms.forEach { (key, label, icon) ->
             val isActive = activePlatform == key
             Box(
@@ -222,13 +258,26 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Icon(icon, label, Modifier.size(14.dp), tint = if (isActive) Color(0xFFEE1D52) else Color.White.copy(0.4f))
-                    Text(label, color = if (isActive) Color.White else Color.White.copy(0.4f), fontSize = fontSize, fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium)
+                    Icon(
+                        icon,
+                        label,
+                        Modifier.size(14.dp),
+                        tint = if (isActive) Color(0xFFEE1D52) else Color.White.copy(0.4f)
+                    )
+                    Text(
+                        label,
+                        color = if (isActive) Color.White else Color.White.copy(0.4f),
+                        fontSize = fontSize,
+                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium
+                    )
                 }
 
-                // Garis bawah menyala (indicator)
                 if (isActive) {
-                    Box(modifier = Modifier.matchParentSize().padding(horizontal = 12.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(horizontal = 12.dp)
+                    ) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
@@ -239,9 +288,11 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
                                         val paint = Paint()
                                         val frameworkPaint = paint.asFrameworkPaint()
 
-                                        frameworkPaint.color = Color(0xFFEE1D52).copy(alpha = 0.6f).toArgb()
+                                        frameworkPaint.color =
+                                            Color(0xFFEE1D52).copy(alpha = 0.6f).toArgb()
 
-                                        frameworkPaint.maskFilter = BlurMaskFilter(12f, BlurMaskFilter.Blur.NORMAL)
+                                        frameworkPaint.maskFilter =
+                                            BlurMaskFilter(12f, BlurMaskFilter.Blur.NORMAL)
 
                                         canvas.drawRoundRect(
                                             left = -5f,
@@ -255,7 +306,12 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
                                     }
                                 }
                                 .background(
-                                    brush = Brush.horizontalGradient(listOf(Color(0xFFEE1D52), Color(0xFFFF6B9D))),
+                                    brush = Brush.horizontalGradient(
+                                        listOf(
+                                            Color(0xFFEE1D52),
+                                            Color(0xFFFF6B9D)
+                                        )
+                                    ),
                                     shape = CircleShape
                                 )
                         )
@@ -266,11 +322,14 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
     }
 }
 
-// ==========================================
-// 3. KOMPONEN SEARCH BAR
-// ==========================================
 @Composable
-fun SearchBar(searchQuery: String, onSearchChange: (String) -> Unit, onClear: () -> Unit, isTablet: Boolean, modifier: Modifier = Modifier) {
+fun SearchBar(
+    searchQuery: String,
+    onSearchChange: (String) -> Unit,
+    onClear: () -> Unit,
+    isTablet: Boolean,
+    modifier: Modifier = Modifier
+) {
     var isFocused by remember { mutableStateOf(false) }
     val fontSize = if (isTablet) 12.sp else 10.sp
 
@@ -280,10 +339,12 @@ fun SearchBar(searchQuery: String, onSearchChange: (String) -> Unit, onClear: ()
             .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(50))
             .border(
                 width = if (isFocused) 1.5.dp else 1.dp,
-                color = if (isFocused) Color(0xFFEE1D52).copy(alpha = 0.5f) else Color.White.copy(alpha = 0.1f),
+                color = if (isFocused) Color(0xFFEE1D52).copy(alpha = 0.5f) else Color.White.copy(
+                    alpha = 0.1f
+                ),
                 shape = RoundedCornerShape(50)
             )
-            .drawBehind { // Efek shadow saat Search diklik (focus)
+            .drawBehind {
                 if (isFocused) {
                     drawIntoCanvas { canvas ->
                         val paint = Paint()
@@ -291,23 +352,40 @@ fun SearchBar(searchQuery: String, onSearchChange: (String) -> Unit, onClear: ()
                         frameworkPaint.color = Color(0xFFEE1D52).copy(alpha = 0.12f).toArgb()
                         frameworkPaint.strokeWidth = 10f
                         frameworkPaint.style = android.graphics.Paint.Style.STROKE
-                        canvas.drawRoundRect(0f, 0f, size.width, size.height, 50.dp.toPx(), 50.dp.toPx(), paint)
+                        canvas.drawRoundRect(
+                            0f,
+                            0f,
+                            size.width,
+                            size.height,
+                            50.dp.toPx(),
+                            50.dp.toPx(),
+                            paint
+                        )
                     }
                 }
             }
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Default.Search, "Search", tint = Color.White.copy(0.35f), modifier = Modifier.size(14.dp))
+        Icon(
+            Icons.Default.Search,
+            "Search",
+            tint = Color.White.copy(0.35f),
+            modifier = Modifier.size(14.dp)
+        )
         Spacer(modifier = Modifier.width(6.dp))
         BasicTextField(
             value = searchQuery,
             onValueChange = onSearchChange,
-            textStyle = TextStyle(color = Color.White, fontSize = fontSize, platformStyle = PlatformTextStyle(includeFontPadding = false)),
+            textStyle = TextStyle(
+                color = Color.White,
+                fontSize = fontSize,
+                platformStyle = PlatformTextStyle(includeFontPadding = false)
+            ),
             cursorBrush = SolidColor(Color(0xFFEE1D52)),
             modifier = Modifier
                 .weight(1f)
-                .onFocusChanged { isFocused = it.isFocused }, // Deteksi kursor masuk
+                .onFocusChanged { isFocused = it.isFocused },
             decorationBox = { innerTextField ->
                 if (searchQuery.isEmpty()) {
                     Text(
@@ -332,7 +410,12 @@ fun SearchBar(searchQuery: String, onSearchChange: (String) -> Unit, onClear: ()
                     .clickable { onClear() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Close, "Clear", tint = Color.White.copy(0.7f), modifier = Modifier.size(10.dp))
+                Icon(
+                    Icons.Default.Close,
+                    "Clear",
+                    tint = Color.White.copy(0.7f),
+                    modifier = Modifier.size(10.dp)
+                )
             }
         }
     }

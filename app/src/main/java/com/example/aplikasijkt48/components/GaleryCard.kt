@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.layout.ContentScale
@@ -27,7 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// --- MODEL DATA SEMENTARA (Sesuaikan dengan milikmu) ---
+
 data class GalleryItem(
     val platform: String,
     val isVideo: Boolean,
@@ -43,11 +44,9 @@ fun GalleryCard(
     onClick: (GalleryItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 1. Deteksi Ukuran Layar (Responsif)
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp > 768
 
-    // Pengaturan ukuran dinamis berdasarkan device
     val cornerRadius = if (isTablet) 16.dp else 12.dp
     val cardHeight = if (isTablet) 320.dp else 240.dp
     val dateTextSize = if (isTablet) 10.sp else 9.sp
@@ -55,7 +54,6 @@ fun GalleryCard(
     val memberTextSize = if (isTablet) 12.sp else 9.sp
     val iconBoxSize = if (isTablet) 26.dp else 20.dp
 
-    // 2. Menentukan Warna & Ikon Platform
     val platformColor = when (item.platform.lowercase()) {
         "instagram" -> Color(0xFFE1306C)
         "tiktok" -> Color(0xFFEE1D52)
@@ -70,18 +68,17 @@ fun GalleryCard(
         else -> getTikTokIcon()
     }
 
-    // 3. WADAH UTAMA (Menumpuk Layer 1, Layer 2, dan Kartu Utama)
     Box(
         modifier = modifier
             .padding(horizontal = 8.dp, vertical = 8.dp)
             .clickable { onClick(item) }
     ) {
-        // --- LAYER 1: Paling Belakang (Miring 5 Derajat) ---
+
         Box(
             modifier = Modifier
-                .matchParentSize() // Ukurannya mengikuti kartu utama persis
-                .padding(4.dp)     // Inset / agak masuk ke dalam
-                .rotate(8f)        // Miring 5 derajat
+                .matchParentSize()
+                .padding(4.dp)
+                .rotate(8f)
                 .shadow(elevation = 12.dp, shape = RoundedCornerShape(cornerRadius))
                 .background(
                     brush = Brush.linearGradient(
@@ -92,7 +89,6 @@ fun GalleryCard(
                 .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(cornerRadius))
         )
 
-        // --- LAYER 2: Tengah (Miring 2.5 Derajat) ---
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -108,7 +104,6 @@ fun GalleryCard(
                 .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(cornerRadius))
         )
 
-        // --- LAYER 3: KARTU UTAMA (Posisi Lurus 0 Derajat di Paling Depan) ---
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,13 +112,11 @@ fun GalleryCard(
                 .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(cornerRadius))
                 .clip(RoundedCornerShape(cornerRadius))
         ) {
-            // Bagian Atas: Gambar / Thumbnail Video
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(cardHeight)
             ) {
-                // Gambar Utama (Coil AsyncImage)
                 Image(
                     painter = painterResource(id = item.image),
                     contentDescription = item.caption,
@@ -131,7 +124,6 @@ fun GalleryCard(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Indikator Video Sederhana (Jika isVideo true)
                 if (item.isVideo) {
                     Box(
                         modifier = Modifier
@@ -140,26 +132,29 @@ fun GalleryCard(
                             .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
-                        Text("VIDEO", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            "VIDEO",
+                            color = Color.White,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
-                // Gradient Gelap di Bagian Bawah Gambar (Agar teks terbaca)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color(0x0D07070F), // Atas: Sangat transparan (0.05%)
-                                    Color(0x6607070F), // Tengah: Setengah transparan (40%)
-                                    Color(0xEB07070F)  // Bawah: Hampir solid gelap (92%)
+                                    Color(0x0D07070F),
+                                    Color(0x6607070F),
+                                    Color(0xEB07070F)
                                 )
                             )
                         )
                 )
 
-                // Teks Tanggal & Caption di Atas Gradient
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
@@ -185,13 +180,15 @@ fun GalleryCard(
                 }
             }
 
-            // Bagian Bawah: Footer (Nama Member & Ikon Platform)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.Transparent)
                     .border(width = 1.dp, color = Color.White.copy(alpha = 0.05f))
-                    .padding(horizontal = if (isTablet) 16.dp else 12.dp, vertical = if (isTablet) 12.dp else 8.dp),
+                    .padding(
+                        horizontal = if (isTablet) 16.dp else 12.dp,
+                        vertical = if (isTablet) 12.dp else 8.dp
+                    ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -203,7 +200,6 @@ fun GalleryCard(
                     letterSpacing = 0.5.sp
                 )
 
-                // Lingkaran Ikon Platform
                 Box(
                     modifier = Modifier
                         .size(iconBoxSize)
@@ -223,13 +219,16 @@ fun GalleryCard(
     }
 }
 
-// ==========================================
-// PEMBUATAN IKON VEKTOR MANUAL (Dari SVG Web)
-// ==========================================
 
 fun getInstagramIcon(): ImageVector {
-    return ImageVector.Builder(name = "Instagram", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
-        path(stroke = androidx.compose.ui.graphics.SolidColor(Color.White), strokeLineWidth = 2.2f) {
+    return ImageVector.Builder(
+        name = "Instagram",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(stroke = SolidColor(Color.White), strokeLineWidth = 2.2f) {
             moveTo(7f, 2f)
             lineTo(17f, 2f)
             arcTo(5f, 5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 22f, 7f)
@@ -241,13 +240,13 @@ fun getInstagramIcon(): ImageVector {
             arcTo(5f, 5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 7f, 2f)
             close()
         }
-        path(stroke = androidx.compose.ui.graphics.SolidColor(Color.White), strokeLineWidth = 2.2f) {
+        path(stroke = SolidColor(Color.White), strokeLineWidth = 2.2f) {
             moveTo(16f, 12f)
             arcTo(4f, 4f, 0f, isMoreThanHalf = true, isPositiveArc = true, 8f, 12f)
             arcTo(4f, 4f, 0f, isMoreThanHalf = true, isPositiveArc = true, 16f, 12f)
             close()
         }
-        path(fill = androidx.compose.ui.graphics.SolidColor(Color.White)) {
+        path(fill = SolidColor(Color.White)) {
             moveTo(19f, 6.5f)
             arcTo(1.5f, 1.5f, 0f, isMoreThanHalf = true, isPositiveArc = true, 16f, 6.5f)
             arcTo(1.5f, 1.5f, 0f, isMoreThanHalf = true, isPositiveArc = true, 19f, 6.5f)
@@ -257,8 +256,14 @@ fun getInstagramIcon(): ImageVector {
 }
 
 fun getTikTokIcon(): ImageVector {
-    return ImageVector.Builder(name = "TikTok", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
-        path(fill = androidx.compose.ui.graphics.SolidColor(Color.White)) {
+    return ImageVector.Builder(
+        name = "TikTok",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(fill = SolidColor(Color.White)) {
             moveTo(19.59f, 6.69f)
             arcTo(4.83f, 4.83f, 0f, isMoreThanHalf = false, isPositiveArc = true, 15.82f, 2.44f)
             lineTo(15.82f, 2f)
@@ -283,8 +288,14 @@ fun getTikTokIcon(): ImageVector {
 }
 
 fun getXIcon(): ImageVector {
-    return ImageVector.Builder(name = "X", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
-        path(fill = androidx.compose.ui.graphics.SolidColor(Color.White)) {
+    return ImageVector.Builder(
+        name = "X",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(fill = SolidColor(Color.White)) {
             moveTo(18.244f, 2.25f)
             lineTo(21.552f, 2.25f)
             lineTo(14.325f, 10.51f)

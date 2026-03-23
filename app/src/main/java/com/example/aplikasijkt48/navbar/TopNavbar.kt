@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TopNavbar(){
+fun TopNavbar() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -102,7 +102,7 @@ fun TopNavbar(){
         }
         HorizontalDivider(
             thickness = 1.dp,
-            color = Color.White.copy(alpha = 0.08f) // Warna garis: Putih transparan 8% (Elegan & Halus)
+            color = Color.White.copy(alpha = 0.08f)
         )
     }
 }

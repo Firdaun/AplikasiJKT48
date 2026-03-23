@@ -74,7 +74,6 @@ object GalleryData {
         MemberProfile(imageResId = R.drawable.kabesha_mikaela_kusjanto,     name = "mikaela",   team = "trainee"),
         MemberProfile(imageResId = R.drawable.kabesha_nur_intan,            name = "intan",     team = "trainee")
     ).sortedWith(
-        // 2. Terjemahan logikamu: Urutkan Tim dulu, baru urutkan Nama A-Z
         compareBy<MemberProfile> { teamOrder[it.team] ?: 5 }
             .thenBy { it.name }
     )

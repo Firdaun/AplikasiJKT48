@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +31,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.aplikasijkt48.components.FloatingControlBar
+import com.example.aplikasijkt48.components.GalleryItem
+import com.example.aplikasijkt48.components.Pagination
 import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
@@ -48,16 +51,19 @@ fun DesainLayarUtama() {
         var viewMode by remember { mutableStateOf("album") }
         var activePlatform by remember { mutableStateOf("all") }
         var searchQuery by remember { mutableStateOf("") }
+        var halamanAktif by remember { mutableIntStateOf(1) }
 
         val daftarFoto = listOf(
-            com.example.aplikasijkt48.components.GalleryItem("Instagram", false, R.drawable.kabesha_angelina_christy, "Theater hari ini pecah banget!", "22 MAR 2026", "Christy"),
-            com.example.aplikasijkt48.components.GalleryItem("TikTok", true, R.drawable.kabesha_angelina_christy, "Lagi latihan dance nih", "21 MAR 2026", "Zee"),
-            com.example.aplikasijkt48.components.GalleryItem("X", false, R.drawable.kabesha_angelina_christy, "Selamat pagi semuanya~", "20 MAR 2026", "Freya"),
-            com.example.aplikasijkt48.components.GalleryItem("Instagram", false, R.drawable.kabesha_angelina_christy, "OOTD jalan-jalan", "19 MAR 2026", "Muthe"),
-            com.example.aplikasijkt48.components.GalleryItem("TikTok", true, R.drawable.kabesha_angelina_christy, "Ikutan trend baru ah", "18 MAR 2026", "Gita")
+            GalleryItem("Instagram", false, R.drawable.kabesha_angelina_christy, "Theater hari ini pecah banget!", "22 MAR 2026", "Christy"),
+            GalleryItem("TikTok", true, R.drawable.kabesha_angelina_christy, "Lagi latihan dance nih", "21 MAR 2026", "Zee"),
+            GalleryItem("X", false, R.drawable.kabesha_angelina_christy, "Selamat pagi semuanya~", "20 MAR 2026", "Freya"),
+            GalleryItem("Instagram", false, R.drawable.kabesha_angelina_christy, "OOTD jalan-jalan", "19 MAR 2026", "Muthe"),
+            GalleryItem("TikTok", true, R.drawable.kabesha_angelina_christy, "Ikutan trend baru ah", "18 MAR 2026", "Gita")
         )
+
         Box(modifier = Modifier.fillMaxSize()) {
             DekorasiLatarBelakang()
+
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -116,6 +122,17 @@ fun DesainLayarUtama() {
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Pagination(
+                    currentPage = halamanAktif,
+                    totalPages = 5,
+                    onPageChange = { halamanBaru ->
+                        halamanAktif = halamanBaru
+                    }
+                )
+
                 Spacer(modifier = Modifier.height(50.dp))
             }
 
@@ -125,31 +142,28 @@ fun DesainLayarUtama() {
 
 @Composable
 fun DekorasiLatarBelakang() {
-    // Wadah seukuran layar penuh (fixed inset-0)
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // 1. Cahaya Merah Pink (Pojok Kiri Atas)
         Box(
             modifier = Modifier
-                .size(600.dp) // Ukuran besar (w-150)
-                .offset(x = (-150).dp, y = (-150).dp) // absolute -top-50 -left-50
+                .size(600.dp)
+                .offset(x = (-150).dp, y = (-150).dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color(0xFFEE1D52).copy(alpha = 0.08f), // Titik tengah
-                            Color.Transparent // Pudar di ujung (blur)
+                            Color(0xFFEE1D52).copy(alpha = 0.08f),
+                            Color.Transparent
                         )
                     ),
                     shape = CircleShape
                 )
         )
 
-        // 2. Cahaya Cyan (Kanan Atas)
         Box(
             modifier = Modifier
-                .size(350.dp) // w-125
-                .align(Alignment.TopEnd) // Nempel di kanan atas
-                .offset(x = 100.dp, y = 80.dp) // top-25 -right-50
+                .size(350.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 100.dp, y = 80.dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
@@ -161,12 +175,11 @@ fun DekorasiLatarBelakang() {
                 )
         )
 
-        // 3. Cahaya Ungu (Bawah Tengah)
         Box(
             modifier = Modifier
-                .size(300.dp) // w-100
+                .size(300.dp)
                 .align(Alignment.BottomStart)
-                .offset(x = 120.dp, y = 50.dp) // bottom-50 left-[40%]
+                .offset(x = 120.dp, y = 50.dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(

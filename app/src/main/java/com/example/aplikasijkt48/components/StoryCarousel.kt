@@ -119,7 +119,7 @@ fun StoryCarousel(
                 Text(
                     text = "Updated Nov 10, 2026",
                     color = Color(0xFF00D4FF),
-                    fontSize = 8.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .background(Color(0xFF00D4FF).copy(alpha = 0.08f), RoundedCornerShape(50))
