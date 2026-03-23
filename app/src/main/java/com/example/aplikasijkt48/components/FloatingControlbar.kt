@@ -210,8 +210,10 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
             val isActive = activePlatform == key
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (isActive) Color(0xFFEE1D52).copy(alpha = 0.1f) else Color.Transparent)
+                    .background(
+                        color = if (isActive) Color(0xFFEE1D52).copy(alpha = 0.1f) else Color.Transparent,
+                        shape = RoundedCornerShape(8.dp)
+                    )
                     .clickable { onPlatformChange(key) },
                 contentAlignment = Alignment.Center
             ) {
@@ -230,18 +232,32 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .height(2.dp)
                                 .drawBehind {
                                     drawIntoCanvas { canvas ->
                                         val paint = Paint()
                                         val frameworkPaint = paint.asFrameworkPaint()
-                                        frameworkPaint.color = Color(0xFFEE1D52).toArgb()
-                                        frameworkPaint.maskFilter = BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL)
-                                        canvas.drawRoundRect(0f, 0f, size.width, size.height, 50f, 50f, paint)
+
+                                        frameworkPaint.color = Color(0xFFEE1D52).copy(alpha = 0.6f).toArgb()
+
+                                        frameworkPaint.maskFilter = BlurMaskFilter(12f, BlurMaskFilter.Blur.NORMAL)
+
+                                        canvas.drawRoundRect(
+                                            left = -5f,
+                                            top = -5f,
+                                            right = size.width + 5f,
+                                            bottom = size.height + 5f,
+                                            radiusX = 50f,
+                                            radiusY = 50f,
+                                            paint = paint
+                                        )
                                     }
                                 }
-                                .fillMaxWidth()
-                                .height(2.dp)
-                                .background(Brush.horizontalGradient(listOf(Color(0xFFEE1D52), Color(0xFFFF6B9D))), RoundedCornerShape(50))
+                                .background(
+                                    brush = Brush.horizontalGradient(listOf(Color(0xFFEE1D52), Color(0xFFFF6B9D))),
+                                    shape = CircleShape
+                                )
                         )
                     }
                 }

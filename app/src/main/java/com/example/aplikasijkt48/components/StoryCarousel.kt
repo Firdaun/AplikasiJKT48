@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -169,7 +170,13 @@ fun StoryCarousel(
                         text = "10,245",
                         color = Color(0xFF00D4FF),
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        style = TextStyle(
+                            shadow = Shadow(
+                                color = Color(0xFF00D4FF).copy(alpha = 1f),
+                                blurRadius = 17f
+                            )
+                        )
                     )
                     Text(
                         text = "TOTAL MEDIA",
@@ -188,7 +195,13 @@ fun StoryCarousel(
                         text = "40",
                         color = Color(0xFFA855F7),
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        style = TextStyle(
+                            shadow = Shadow(
+                                color = Color(0xFFA855F7).copy(alpha = 1f),
+                                blurRadius = 17f
+                            )
+                        )
                     )
                     Text(
                         text = "MEMBERS",
