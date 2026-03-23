@@ -1,5 +1,6 @@
 package com.example.aplikasijkt48.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,17 +21,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 
 // --- MODEL DATA SEMENTARA (Sesuaikan dengan milikmu) ---
 data class GalleryItem(
     val platform: String,
     val isVideo: Boolean,
-    val image: String,
+    val image: Int,
     val caption: String,
     val date: String,
     val member: String
@@ -80,7 +81,7 @@ fun GalleryCard(
             modifier = Modifier
                 .matchParentSize() // Ukurannya mengikuti kartu utama persis
                 .padding(4.dp)     // Inset / agak masuk ke dalam
-                .rotate(5f)        // Miring 5 derajat
+                .rotate(8f)        // Miring 5 derajat
                 .shadow(elevation = 12.dp, shape = RoundedCornerShape(cornerRadius))
                 .background(
                     brush = Brush.linearGradient(
@@ -96,7 +97,7 @@ fun GalleryCard(
             modifier = Modifier
                 .matchParentSize()
                 .padding(2.dp)
-                .rotate(2.5f)
+                .rotate(4f)
                 .shadow(elevation = 10.dp, shape = RoundedCornerShape(cornerRadius))
                 .background(
                     brush = Brush.linearGradient(
@@ -123,8 +124,8 @@ fun GalleryCard(
                     .height(cardHeight)
             ) {
                 // Gambar Utama (Coil AsyncImage)
-                AsyncImage(
-                    model = item.image,
+                Image(
+                    painter = painterResource(id = item.image),
                     contentDescription = item.caption,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

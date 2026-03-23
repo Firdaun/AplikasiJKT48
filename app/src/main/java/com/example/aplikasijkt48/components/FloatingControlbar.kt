@@ -230,8 +230,6 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .height(2.dp)
                                 .drawBehind {
                                     drawIntoCanvas { canvas ->
                                         val paint = Paint()
@@ -241,6 +239,8 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
                                         canvas.drawRoundRect(0f, 0f, size.width, size.height, 50f, 50f, paint)
                                     }
                                 }
+                                .fillMaxWidth()
+                                .height(2.dp)
                                 .background(Brush.horizontalGradient(listOf(Color(0xFFEE1D52), Color(0xFFFF6B9D))), RoundedCornerShape(50))
                         )
                     }

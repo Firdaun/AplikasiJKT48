@@ -77,7 +77,8 @@ val teamStyles = mapOf(
 @Composable
 fun StoryCarousel(
     activeMember: String,
-    onSelectMember: (String) -> Unit
+    onSelectMember: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val totalData = GalleryData.photoProfile.size
     val startIndex = (Int.MAX_VALUE / 2) - ((Int.MAX_VALUE / 2) % totalData)
@@ -105,13 +106,12 @@ fun StoryCarousel(
         }
     }
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 5.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
@@ -205,6 +205,7 @@ fun StoryCarousel(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(5.dp))
         LazyRow(
             state = listState,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
