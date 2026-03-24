@@ -67,7 +67,7 @@ fun GalleryGrid(
     }
 
     // --- KONDISI 2: MODE GRID (Kotak-kotak kecil ala IG) ---
-    if (viewMode == "grid") {
+    if (viewMode == "photo") {
         val columns = if (isTablet) 5 else 3 // Tablet 5 kolom, HP 3 kolom
 
         Column(
@@ -138,8 +138,8 @@ fun GridSquareItem(
             .clickable { onClick(item) }
     ) {
         // Thumbnail Gambar/Video
-        Image(
-            painter = painterResource(id = item.image),
+        coil.compose.AsyncImage(
+            model = item.imageUrl,
             contentDescription = item.caption,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()

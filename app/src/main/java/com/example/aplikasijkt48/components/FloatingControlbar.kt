@@ -175,7 +175,7 @@ fun ToggleGroup(
             }
         }
 
-        val isGrid = viewMode == "grid"
+        val isGrid = viewMode == "photo"
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -205,7 +205,7 @@ fun ToggleGroup(
                     if (isGrid) Brush.linearGradient(listOf(Color(0xFF00D4FF), Color(0xFF0099BB)))
                     else SolidColor(Color.Transparent)
                 )
-                .clickable { onViewModeChange("grid") },
+                .clickable { onViewModeChange("photo") },
             contentAlignment = Alignment.Center
         ) {
             Row(

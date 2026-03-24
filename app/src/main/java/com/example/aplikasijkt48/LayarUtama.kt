@@ -1,11 +1,11 @@
 package com.example.aplikasijkt48
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aplikasijkt48.components.FloatingControlBar
 import com.example.aplikasijkt48.components.GalleryGrid
 import com.example.aplikasijkt48.components.GalleryItem
@@ -37,11 +41,15 @@ import com.example.aplikasijkt48.components.InfoHasilPencarian
 import com.example.aplikasijkt48.components.Pagination
 import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
+import com.example.aplikasijkt48.network.GalleryViewModel
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DesainLayarUtama() {
+fun DesainLayarUtama(
+    viewModel: GalleryViewModel = viewModel()
+) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFF07070F),
@@ -49,25 +57,43 @@ fun DesainLayarUtama() {
             TopNavbar()
         }
     ) { innerPadding ->
-        var activeMemberName by remember { mutableStateOf("christy") }
+        var activeMemberName by remember { mutableStateOf("") }
         var viewMode by remember { mutableStateOf("album") }
         var activePlatform by remember { mutableStateOf("all") }
         var searchQuery by remember { mutableStateOf("") }
         var halamanAktif by remember { mutableIntStateOf(1) }
-
-        val daftarFoto = listOf(
-            GalleryItem("Instagram", false, R.drawable.ic_launcher_background, "Theater hari ini pecah banget!", "22 MAR 2026", "Christy"),
-            GalleryItem("TikTok", true, R.drawable.ic_launcher_background, "Lagi latihan dance nih", "21 MAR 2026", "Zee"),
-            GalleryItem("X", false, R.drawable.ic_launcher_background, "Selamat pagi semuanya~", "20 MAR 2026", "Freya"),
-            GalleryItem("Instagram", false, R.drawable.ic_launcher_background, "OOTD jalan-jalan", "19 MAR 2026", "Muthe"),
-            GalleryItem("TikTok", true, R.drawable.ic_launcher_background, "Ikutan trend baru ah", "18 MAR 2026", "Gita")
-        )
-
-        // Tambahkan state ini di bawah var halamanAktif ...
         var postUrl by remember { mutableStateOf("") }
-        val totalItem = daftarFoto.size // Anggap ini paging.total_item
-        val globalAlbumCount = 5 // Angka bohongan untuk ngetes tombol kedua
 
+        val daftarFoto = viewModel.fotoList.map { apiData ->
+            GalleryItem(
+                platform = apiData.source,
+                isVideo = apiData.mediaType == "VIDEO" || apiData.srcUrl.endsWith(".mp4"),
+                // Menempelkan IP lokal ke path foto (/photos/...)
+                imageUrl = "http://192.168.1.7:3000${apiData.srcUrl}",
+                caption = apiData.caption ?: "Tanpa Caption",
+                date = apiData.postedAt.take(10), // Ambil tanggalnya saja (YYYY-MM-DD)
+                member = apiData.member?.nickname ?: "JKT48"
+            )
+        }
+
+        val totalItem = viewModel.pagingInfo?.totalItem ?: 0
+        val totalPages = viewModel.pagingInfo?.totalPage ?: 1
+        val globalAlbumCount = 5 // Dummy logic sementara untuk tombol "Show Photos"
+
+        LaunchedEffect(activeMemberName, viewMode, activePlatform, searchQuery, halamanAktif, postUrl) {
+            // Debounce manual buat search (Biar gak spam API tiap ngetik 1 huruf)
+            delay(300)
+
+            viewModel.fetchPhotos(
+                page = halamanAktif,
+                size = if (viewMode == "album") 8 else 28,
+                source = activePlatform,
+                nickname = activeMemberName,
+                mode = viewMode,
+                search = searchQuery,
+                postUrl = postUrl
+            )
+        }
 
         Box(modifier = Modifier.fillMaxSize()) {
             DekorasiLatarBelakang()
@@ -85,6 +111,7 @@ fun DesainLayarUtama() {
                     activeMember = activeMemberName,
                     onSelectMember = { namaMember ->
                         activeMemberName = namaMember
+                        halamanAktif = 1
                     }
                 )
 
@@ -92,12 +119,24 @@ fun DesainLayarUtama() {
 
                 FloatingControlBar(
                     viewMode = viewMode,
-                    onViewModeChange = { viewMode = it },
+                    onViewModeChange = {
+                        viewMode = it
+                        halamanAktif = 1
+                    },
                     activePlatform = activePlatform,
-                    onPlatformChange = { activePlatform = it },
+                    onPlatformChange = {
+                        activePlatform = it
+                        halamanAktif = 1
+                    },
                     searchQuery = searchQuery,
-                    onSearchChange = { searchQuery = it },
-                    onClear = { searchQuery = "" }
+                    onSearchChange = {
+                        searchQuery = it
+                        halamanAktif = 1
+                    },
+                    onClear = {
+                        searchQuery = ""
+                        halamanAktif = 1
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(13.dp))
@@ -112,34 +151,58 @@ fun DesainLayarUtama() {
                         activeMemberName = ""
                         searchQuery = ""
                         postUrl = ""
+                        halamanAktif = 1
                     },
                     onShowMemberPhotosClick = {
-                        viewMode = "grid"
+                        viewMode = "photo"
                         postUrl = ""
+                        halamanAktif = 1
                     }
                 )
 
                 Spacer(modifier = Modifier.height(13.dp))
 
-                GalleryGrid(
-                    viewMode = viewMode,
-                    items = daftarFoto,
-                    onItemClick = { diklik ->
-                        Log.d("TEST_KLIK", "Kartu ${diklik.member} diklik!")
+                if (viewModel.isLoading) {
+                    Box(modifier = Modifier.height(200.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFFEE1D52))
                     }
-                )
+                } else if (viewModel.errorMessage != null) {
+                    Box(modifier = Modifier
+                        .fillMaxHeight()
+                        .height(200.dp), contentAlignment = Alignment.Center) {
+                        Text(text = "Error: ${viewModel.errorMessage}", color = Color.Red)
+                    }
+                } else {
+                    GalleryGrid(
+                        viewMode = viewMode,
+                        items = daftarFoto,
+                        onItemClick = { diklik ->
+                            // Kalau lagi mode album, klik card akan masuk ke mode Grid dan pasang PostUrl-nya
+                            if (viewMode == "album") {
+                                // Cari url aslinya dari data API berdasarkan indeks/cocokin
+                                val indexData = daftarFoto.indexOf(diklik)
+                                if (indexData != -1) {
+                                    postUrl = viewModel.fotoList[indexData].postUrl ?: ""
+                                    viewMode = "photo"
+                                    halamanAktif = 1
+                                    activeMemberName = diklik.member.lowercase()
+                                }
+                            }
+                        }
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Pagination(
-                    currentPage = halamanAktif,
-                    totalPages = 5,
-                    onPageChange = { halamanBaru ->
-                        halamanAktif = halamanBaru
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(50.dp))
+                if (totalPages > 1) {
+                    Pagination(
+                        currentPage = halamanAktif,
+                        totalPages = totalPages,
+                        onPageChange = { halamanBaru ->
+                            halamanAktif = halamanBaru
+                        }
+                    )
+                }
             }
 
         }

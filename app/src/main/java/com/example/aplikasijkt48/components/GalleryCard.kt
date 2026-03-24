@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 data class GalleryItem(
     val platform: String,
     val isVideo: Boolean,
-    val image: Int,
+    val imageUrl: String,
     val caption: String,
     val date: String,
     val member: String
@@ -117,8 +117,8 @@ fun GalleryCard(
                     .fillMaxWidth()
                     .height(cardHeight)
             ) {
-                Image(
-                    painter = painterResource(id = item.image),
+                coil.compose.AsyncImage(
+                    model = item.imageUrl,
                     contentDescription = item.caption,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
