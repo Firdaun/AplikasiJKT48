@@ -52,7 +52,7 @@ fun Pagination(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .padding(vertical = 32.dp),
+            .padding(vertical = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -31,7 +31,9 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.aplikasijkt48.components.FloatingControlBar
+import com.example.aplikasijkt48.components.GalleryGrid
 import com.example.aplikasijkt48.components.GalleryItem
+import com.example.aplikasijkt48.components.InfoHasilPencarian
 import com.example.aplikasijkt48.components.Pagination
 import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
@@ -54,12 +56,18 @@ fun DesainLayarUtama() {
         var halamanAktif by remember { mutableIntStateOf(1) }
 
         val daftarFoto = listOf(
-            GalleryItem("Instagram", false, R.drawable.kabesha_angelina_christy, "Theater hari ini pecah banget!", "22 MAR 2026", "Christy"),
-            GalleryItem("TikTok", true, R.drawable.kabesha_angelina_christy, "Lagi latihan dance nih", "21 MAR 2026", "Zee"),
-            GalleryItem("X", false, R.drawable.kabesha_angelina_christy, "Selamat pagi semuanya~", "20 MAR 2026", "Freya"),
-            GalleryItem("Instagram", false, R.drawable.kabesha_angelina_christy, "OOTD jalan-jalan", "19 MAR 2026", "Muthe"),
-            GalleryItem("TikTok", true, R.drawable.kabesha_angelina_christy, "Ikutan trend baru ah", "18 MAR 2026", "Gita")
+            GalleryItem("Instagram", false, R.drawable.ic_launcher_background, "Theater hari ini pecah banget!", "22 MAR 2026", "Christy"),
+            GalleryItem("TikTok", true, R.drawable.ic_launcher_background, "Lagi latihan dance nih", "21 MAR 2026", "Zee"),
+            GalleryItem("X", false, R.drawable.ic_launcher_background, "Selamat pagi semuanya~", "20 MAR 2026", "Freya"),
+            GalleryItem("Instagram", false, R.drawable.ic_launcher_background, "OOTD jalan-jalan", "19 MAR 2026", "Muthe"),
+            GalleryItem("TikTok", true, R.drawable.ic_launcher_background, "Ikutan trend baru ah", "18 MAR 2026", "Gita")
         )
+
+        // Tambahkan state ini di bawah var halamanAktif ...
+        var postUrl by remember { mutableStateOf("") }
+        val totalItem = daftarFoto.size // Anggap ini paging.total_item
+        val globalAlbumCount = 5 // Angka bohongan untuk ngetes tombol kedua
+
 
         Box(modifier = Modifier.fillMaxSize()) {
             DekorasiLatarBelakang()
@@ -94,34 +102,32 @@ fun DesainLayarUtama() {
 
                 Spacer(modifier = Modifier.height(13.dp))
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(5.dp)
-                ) {
-                    daftarFoto.chunked(2).forEach { barisFoto ->
-                        androidx.compose.foundation.layout.Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
-                                5.dp
-                            )
-                        ) {
-                            barisFoto.forEach { foto ->
-                                com.example.aplikasijkt48.components.GalleryCard(
-                                    item = foto,
-                                    onClick = { diklik ->
-                                        Log.d("TEST_KLIK", "Kartu ${diklik.member} diklik!")
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-
-                            if (barisFoto.size == 1) {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
+                InfoHasilPencarian(
+                    nickname = activeMemberName,
+                    viewMode = viewMode,
+                    totalItem = totalItem,
+                    postUrl = postUrl,
+                    globalAlbumCount = globalAlbumCount,
+                    onShowAllClick = {
+                        activeMemberName = ""
+                        searchQuery = ""
+                        postUrl = ""
+                    },
+                    onShowMemberPhotosClick = {
+                        viewMode = "grid"
+                        postUrl = ""
                     }
-                }
+                )
+
+                Spacer(modifier = Modifier.height(13.dp))
+
+                GalleryGrid(
+                    viewMode = viewMode,
+                    items = daftarFoto,
+                    onItemClick = { diklik ->
+                        Log.d("TEST_KLIK", "Kartu ${diklik.member} diklik!")
+                    }
+                )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
