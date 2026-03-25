@@ -72,195 +72,197 @@ fun DesainLayarUtama(
             GalleryItem(
                 platform = apiData.source,
                 isVideo = apiData.mediaType == "VIDEO" || apiData.srcUrl.endsWith(".mp4"),
-                // Menempelkan IP lokal ke path foto (/photos/...)
                 imageUrl = "http://192.168.1.7:3000${apiData.srcUrl}",
                 caption = apiData.caption ?: "Tanpa Caption",
-                date = apiData.postedAt.take(10), // Ambil tanggalnya saja (YYYY-MM-DD)
+                date = apiData.postedAt.take(10),
                 member = apiData.member?.nickname ?: "JKT48"
             )
         }
 
         val totalItem = viewModel.pagingInfo?.totalItem ?: 0
         val totalPages = viewModel.pagingInfo?.totalPage ?: 1
-        val globalAlbumCount = 5 // Dummy logic sementara untuk tombol "Show Photos"
+        val globalAlbumCount = 5
 
-        LaunchedEffect(activeMemberName, viewMode, activePlatform, searchQuery, halamanAktif, postUrl) {
-            if (searchQuery.isNotEmpty()) {
-                delay(300)
-            }
-
+        fun tarikDataInstan(
+            targetPage: Int = halamanAktif,
+            targetMode: String = viewMode,
+            targetNickname: String = activeMemberName,
+            targetUrl: String = postUrl,
+            isRefresh: Boolean = false
+        ) {
             viewModel.fetchPhotos(
-                page = halamanAktif,
-                size = if (viewMode == "album") 8 else 28,
+                page = targetPage,
+                size = if (targetMode == "album") 8 else 28,
                 source = activePlatform,
-                nickname = activeMemberName,
-                mode = viewMode,
-                search = null,
-                postUrl = postUrl
+                nickname = targetNickname,
+                mode = targetMode,
+                search = searchQuery.ifEmpty { null },
+                postUrl = targetUrl,
+                forceRefresh = isRefresh
             )
         }
 
-        PullToRefreshBox(
-            modifier = Modifier.fillMaxSize(),
-            state = pullRefreshState,
-            isRefreshing = isRefreshing,
-            onRefresh = {
-                isRefreshing = true
+        LaunchedEffect(
+            activeMemberName,
+            viewMode,
+            activePlatform,
+            searchQuery,
+            halamanAktif,
+            postUrl
+        ) {
+            if (searchQuery.isNotEmpty()) {
+                delay(300)
+            }
+            tarikDataInstan()
+        }
 
-                viewModel.fetchPhotos(
-                    page = halamanAktif,
-                    size = if (viewMode == "album") 8 else 28,
-                    source = activePlatform,
-                    nickname = activeMemberName,
-                    mode = viewMode,
-                    search = searchQuery.ifEmpty { null },
-                    postUrl = postUrl,
-                    forceRefresh = true
-                )
-
+        LaunchedEffect(viewModel.isLoading) {
+            if (!viewModel.isLoading) {
                 isRefreshing = false
             }
-        ) {
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
             DekorasiLatarBelakang()
 
-            Column(
+            PullToRefreshBox(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .padding(horizontal = 13.dp)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize(),
+                state = pullRefreshState,
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    isRefreshing = true
+
+                    tarikDataInstan(isRefresh = true)
+                }
             ) {
-                StoryCarousel(
-                    modifier = Modifier.padding(top = 20.dp),
-                    activeMember = activeMemberName,
-                    onSelectMember = { namaMember ->
-                        activeMemberName = namaMember
-                        searchQuery = ""
-                        halamanAktif = 1
-                    }
-                )
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 13.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    StoryCarousel(
+                        modifier = Modifier.padding(top = 20.dp),
+                        activeMember = activeMemberName,
+                        onSelectMember = { namaMember ->
+                            activeMemberName = namaMember
+                            searchQuery = ""
+                            halamanAktif = 1
+                        }
+                    )
 
-                Spacer(modifier = Modifier.height(5.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
-                FloatingControlBar(
-                    viewMode = viewMode,
-                    onViewModeChange = {
-                        viewModel.fetchPhotos(
-                            page = 1,
-                            size = if (it == "album") 8 else 28,
-                            source = activePlatform,
-                            nickname = activeMemberName,
-                            mode = it,
-                            search = searchQuery.ifEmpty { null },
-                            postUrl = postUrl,
-                        )
-                        viewMode = it
-                        halamanAktif = 1
-                    },
-                    activePlatform = activePlatform,
-                    onPlatformChange = {
-                        activePlatform = it
-                        halamanAktif = 1
-                    },
-                    searchQuery = searchQuery,
-                    onSearchChange = {
-                        searchQuery = it
-                        activeMemberName = it.lowercase().trim()
-                        halamanAktif = 1
-                    },
-                    onClear = {
-                        searchQuery = ""
-                        activeMemberName = ""
-                        halamanAktif = 1
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(13.dp))
-
-                InfoHasilPencarian(
-                    nickname = activeMemberName,
-                    viewMode = viewMode,
-                    totalItem = totalItem,
-                    postUrl = postUrl,
-                    globalAlbumCount = globalAlbumCount,
-                    onShowAllClick = {
-                        activeMemberName = ""
-                        searchQuery = ""
-                        postUrl = ""
-                        halamanAktif = 1
-                    },
-                    onShowMemberPhotosClick = {
-                        viewModel.fetchPhotos(
-                            page = 1,
-                            size = 28,
-                            source = activePlatform,
-                            nickname = activeMemberName,
-                            mode = "photo",
-                            search = searchQuery.ifEmpty { null },
-                            postUrl = ""
-                        )
-                        viewMode = "photo"
-                        postUrl = ""
-                        halamanAktif = 1
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(13.dp))
-
-                if (viewModel.isLoading) {
-                    Box(modifier = Modifier.height(200.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFFEE1D52))
-                    }
-                } else if (viewModel.errorMessage != null) {
-                    Box(modifier = Modifier
-                        .fillMaxHeight()
-                        .height(200.dp), contentAlignment = Alignment.Center) {
-                        Text(text = "Error: ${viewModel.errorMessage}", color = Color.Red)
-                    }
-                } else {
-                    GalleryGrid(
+                    FloatingControlBar(
                         viewMode = viewMode,
-                        items = daftarFoto,
-                        onItemClick = { diklik ->
-                            if (viewMode == "album") {
-                                val indexData = daftarFoto.indexOf(diklik)
-                                if (indexData != -1) {
-                                    val targetPostUrl = viewModel.fotoList[indexData].postUrl ?: ""
-                                    val targetNickname = diklik.member.lowercase()
-                                    viewModel.fetchPhotos(
-                                        page = 1,
-                                        size = 28,
-                                        source = activePlatform,
-                                        nickname = targetNickname,
-                                        mode = "photo",
-                                        search = searchQuery.ifEmpty { null },
-                                        postUrl = targetPostUrl
-                                    )
+                        onViewModeChange = {
+                            tarikDataInstan(targetPage = 1, targetMode = it)
 
-                                    postUrl = targetPostUrl
-                                    viewMode = "photo"
-                                    halamanAktif = 1
-                                    activeMemberName = diklik.member.lowercase()
+                            viewMode = it
+                            halamanAktif = 1
+                        },
+                        activePlatform = activePlatform,
+                        onPlatformChange = {
+                            activePlatform = it
+                            halamanAktif = 1
+                        },
+                        searchQuery = searchQuery,
+                        onSearchChange = {
+                            searchQuery = it
+                            activeMemberName = it.lowercase().trim()
+                            halamanAktif = 1
+                        },
+                        onClear = {
+                            searchQuery = ""
+                            activeMemberName = ""
+                            halamanAktif = 1
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(13.dp))
+
+                    InfoHasilPencarian(
+                        nickname = activeMemberName,
+                        viewMode = viewMode,
+                        totalItem = totalItem,
+                        postUrl = postUrl,
+                        globalAlbumCount = globalAlbumCount,
+                        onShowAllClick = {
+                            activeMemberName = ""
+                            searchQuery = ""
+                            postUrl = ""
+                            halamanAktif = 1
+                        },
+                        onShowMemberPhotosClick = {
+                            tarikDataInstan(targetPage = 1, targetMode = "photo", targetUrl = "")
+                            viewMode = "photo"
+                            postUrl = ""
+                            halamanAktif = 1
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(13.dp))
+
+                    if (viewModel.isLoading) {
+                        Box(
+                            modifier = Modifier.height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Color(0xFFEE1D52))
+                        }
+                    } else if (viewModel.errorMessage != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .height(200.dp), contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Error: ${viewModel.errorMessage}", color = Color.Red)
+                        }
+                    } else {
+                        GalleryGrid(
+                            viewMode = viewMode,
+                            items = daftarFoto,
+                            onItemClick = { diklik ->
+                                if (viewMode == "album") {
+                                    val indexData = daftarFoto.indexOf(diklik)
+                                    if (indexData != -1) {
+                                        val targetPostUrl =
+                                            viewModel.fotoList[indexData].postUrl ?: ""
+                                        val targetNickname = diklik.member.lowercase()
+                                        tarikDataInstan(
+                                            targetPage = 1,
+                                            targetMode = "photo",
+                                            targetNickname = targetNickname,
+                                            targetUrl = targetPostUrl
+                                        )
+
+                                        postUrl = targetPostUrl
+                                        viewMode = "photo"
+                                        halamanAktif = 1
+                                        activeMemberName = diklik.member.lowercase()
+                                    }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    if (totalPages > 1) {
+                        Pagination(
+                            currentPage = halamanAktif,
+                            totalPages = totalPages,
+                            onPageChange = { halamanBaru ->
+                                halamanAktif = halamanBaru
+                            }
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                if (totalPages > 1) {
-                    Pagination(
-                        currentPage = halamanAktif,
-                        totalPages = totalPages,
-                        onPageChange = { halamanBaru ->
-                            halamanAktif = halamanBaru
-                        }
-                    )
-                }
             }
-
         }
     }
 }
