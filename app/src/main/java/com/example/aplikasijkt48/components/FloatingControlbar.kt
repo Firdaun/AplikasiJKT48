@@ -235,7 +235,7 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
     val platforms = listOf(
         Triple("all", "All", Icons.Default.Language),
         Triple("instagram", "Instagram", Icons.Default.CameraAlt),
-        Triple("twitter", "X/Twitter", Icons.Default.Close)
+        Triple("x", "X/Twitter", Icons.Default.Close)
     )
 
     Row(

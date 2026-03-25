@@ -88,32 +88,31 @@ fun DesainLayarUtama(
             targetMode: String = viewMode,
             targetNickname: String = activeMemberName,
             targetUrl: String = postUrl,
+            targetPlatform: String = activePlatform,
+            targetSearch: String? = searchQuery.ifEmpty { null },
             isRefresh: Boolean = false
         ) {
             viewModel.fetchPhotos(
                 page = targetPage,
                 size = if (targetMode == "album") 8 else 28,
-                source = activePlatform,
+                source = targetPlatform,
                 nickname = targetNickname,
                 mode = targetMode,
-                search = searchQuery.ifEmpty { null },
+                search = targetSearch,
                 postUrl = targetUrl,
                 forceRefresh = isRefresh
             )
         }
 
-        LaunchedEffect(
-            activeMemberName,
-            viewMode,
-            activePlatform,
-            searchQuery,
-            halamanAktif,
-            postUrl
-        ) {
+        LaunchedEffect(Unit) {
+            tarikDataInstan()
+        }
+
+        LaunchedEffect(searchQuery) {
             if (searchQuery.isNotEmpty()) {
                 delay(300)
+                tarikDataInstan()
             }
-            tarikDataInstan()
         }
 
         LaunchedEffect(viewModel.isLoading) {
@@ -148,6 +147,7 @@ fun DesainLayarUtama(
                         modifier = Modifier.padding(top = 20.dp),
                         activeMember = activeMemberName,
                         onSelectMember = { namaMember ->
+                            tarikDataInstan(targetNickname = namaMember, targetSearch = "", targetPage = 1)
                             activeMemberName = namaMember
                             searchQuery = ""
                             halamanAktif = 1
@@ -166,6 +166,7 @@ fun DesainLayarUtama(
                         },
                         activePlatform = activePlatform,
                         onPlatformChange = {
+                            tarikDataInstan(targetPlatform = it, targetPage = 1)
                             activePlatform = it
                             halamanAktif = 1
                         },
@@ -176,6 +177,7 @@ fun DesainLayarUtama(
                             halamanAktif = 1
                         },
                         onClear = {
+                            tarikDataInstan(targetNickname = "", targetSearch = "", targetPage = 1)
                             searchQuery = ""
                             activeMemberName = ""
                             halamanAktif = 1
@@ -191,6 +193,7 @@ fun DesainLayarUtama(
                         postUrl = postUrl,
                         globalAlbumCount = globalAlbumCount,
                         onShowAllClick = {
+                            tarikDataInstan(targetNickname = "", targetSearch = "", targetUrl = "", targetPage = 1)
                             activeMemberName = ""
                             searchQuery = ""
                             postUrl = ""
@@ -206,7 +209,7 @@ fun DesainLayarUtama(
 
                     Spacer(modifier = Modifier.height(13.dp))
 
-                    if (viewModel.isLoading) {
+                    if (viewModel.isLoading && viewModel.fotoList.isEmpty()) {
                         Box(
                             modifier = Modifier.height(200.dp),
                             contentAlignment = Alignment.Center
@@ -256,6 +259,8 @@ fun DesainLayarUtama(
                             currentPage = halamanAktif,
                             totalPages = totalPages,
                             onPageChange = { halamanBaru ->
+                                tarikDataInstan(targetPage = halamanBaru)
+
                                 halamanAktif = halamanBaru
                             }
                         )

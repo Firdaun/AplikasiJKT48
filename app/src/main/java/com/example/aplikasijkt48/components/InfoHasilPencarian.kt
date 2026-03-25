@@ -44,13 +44,12 @@ fun InfoHasilPencarian(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // BAGIAN KIRI: "Christy's albums (5 results)"
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp) // gap-1
         ) {
             val prefix = if (nickname.isNotEmpty()) "$nickname's" else "All"
-            val suffix = if (viewMode == "grid") "photos" else "albums"
+            val suffix = if (viewMode == "photo") "photos" else "albums"
 
             Text(
                 text = "$prefix $suffix".uppercase(),
@@ -60,7 +59,6 @@ fun InfoHasilPencarian(
                 style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
             )
 
-            // Badge merah jumlah hasil
             Text(
                 text = "$totalItem results",
                 color = Color(0xFFEE1D52),
@@ -74,7 +72,6 @@ fun InfoHasilPencarian(
             )
         }
 
-        // BAGIAN KANAN: Tombol "show all albums" & "show photos"
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp), // gap-2
             verticalAlignment = Alignment.CenterVertically
@@ -93,7 +90,7 @@ fun InfoHasilPencarian(
 
             // Tombol 1: Show All (Hanya muncul jika ada nickname yang dipilih)
             if (nickname.isNotEmpty()) {
-                val buttonSuffix = if (viewMode == "grid") "photos" else "albums"
+                val buttonSuffix = if (viewMode == "photo") "photos" else "albums"
                 Text(
                     text = "SHOW ALL $buttonSuffix".uppercase(),
                     color = Color.White.copy(alpha = 0.35f),
