@@ -7,9 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-// 1. Daftar URL API
 interface ApiService {
-    // Asumsiku alamat API kamu berakhiran /api/photos (sesuaikan kalau beda)
     @GET("api/photos")
     suspend fun getPublicPhotos(
         @Query("page") page: Int = 1,

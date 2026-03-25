@@ -22,11 +22,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.decode.VideoFrameDecoder
+import coil.request.ImageRequest
+import coil.request.videoFrameMillis
 
 
 data class GalleryItem(
@@ -46,6 +50,7 @@ fun GalleryCard(
 ) {
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp > 768
+    val context = LocalContext.current
 
     val cornerRadius = if (isTablet) 16.dp else 12.dp
     val cardHeight = if (isTablet) 320.dp else 240.dp
@@ -73,7 +78,6 @@ fun GalleryCard(
             .padding(horizontal = 8.dp, vertical = 8.dp)
             .clickable { onClick(item) }
     ) {
-
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -117,8 +121,18 @@ fun GalleryCard(
                     .fillMaxWidth()
                     .height(cardHeight)
             ) {
+                val imageModel = if (item.isVideo) {
+                    ImageRequest.Builder(context)
+                        .data(item.imageUrl)
+                        .decoderFactory(VideoFrameDecoder.Factory())
+                        .videoFrameMillis(1000)
+                        .build()
+                } else {
+                    item.imageUrl
+                }
+
                 coil.compose.AsyncImage(
-                    model = item.imageUrl,
+                    model = imageModel,
                     contentDescription = item.caption,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

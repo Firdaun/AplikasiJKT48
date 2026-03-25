@@ -19,6 +19,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +65,8 @@ fun DesainLayarUtama(
         var searchQuery by remember { mutableStateOf("") }
         var halamanAktif by remember { mutableIntStateOf(1) }
         var postUrl by remember { mutableStateOf("") }
+        var isRefreshing by remember { mutableStateOf(false) }
+        val pullRefreshState = rememberPullToRefreshState()
 
         val daftarFoto = viewModel.fotoList.map { apiData ->
             GalleryItem(
@@ -81,8 +85,9 @@ fun DesainLayarUtama(
         val globalAlbumCount = 5 // Dummy logic sementara untuk tombol "Show Photos"
 
         LaunchedEffect(activeMemberName, viewMode, activePlatform, searchQuery, halamanAktif, postUrl) {
-            // Debounce manual buat search (Biar gak spam API tiap ngetik 1 huruf)
-            delay(300)
+            if (searchQuery.isNotEmpty()) {
+                delay(300)
+            }
 
             viewModel.fetchPhotos(
                 page = halamanAktif,
@@ -90,12 +95,32 @@ fun DesainLayarUtama(
                 source = activePlatform,
                 nickname = activeMemberName,
                 mode = viewMode,
-                search = searchQuery,
+                search = null,
                 postUrl = postUrl
             )
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        PullToRefreshBox(
+            modifier = Modifier.fillMaxSize(),
+            state = pullRefreshState,
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+
+                viewModel.fetchPhotos(
+                    page = halamanAktif,
+                    size = if (viewMode == "album") 8 else 28,
+                    source = activePlatform,
+                    nickname = activeMemberName,
+                    mode = viewMode,
+                    search = searchQuery.ifEmpty { null },
+                    postUrl = postUrl,
+                    forceRefresh = true
+                )
+
+                isRefreshing = false
+            }
+        ) {
             DekorasiLatarBelakang()
 
             Column(
@@ -111,6 +136,7 @@ fun DesainLayarUtama(
                     activeMember = activeMemberName,
                     onSelectMember = { namaMember ->
                         activeMemberName = namaMember
+                        searchQuery = ""
                         halamanAktif = 1
                     }
                 )
@@ -120,6 +146,15 @@ fun DesainLayarUtama(
                 FloatingControlBar(
                     viewMode = viewMode,
                     onViewModeChange = {
+                        viewModel.fetchPhotos(
+                            page = 1,
+                            size = if (it == "album") 8 else 28,
+                            source = activePlatform,
+                            nickname = activeMemberName,
+                            mode = it,
+                            search = searchQuery.ifEmpty { null },
+                            postUrl = postUrl,
+                        )
                         viewMode = it
                         halamanAktif = 1
                     },
@@ -131,10 +166,12 @@ fun DesainLayarUtama(
                     searchQuery = searchQuery,
                     onSearchChange = {
                         searchQuery = it
+                        activeMemberName = it.lowercase().trim()
                         halamanAktif = 1
                     },
                     onClear = {
                         searchQuery = ""
+                        activeMemberName = ""
                         halamanAktif = 1
                     }
                 )
@@ -154,6 +191,15 @@ fun DesainLayarUtama(
                         halamanAktif = 1
                     },
                     onShowMemberPhotosClick = {
+                        viewModel.fetchPhotos(
+                            page = 1,
+                            size = 28,
+                            source = activePlatform,
+                            nickname = activeMemberName,
+                            mode = "photo",
+                            search = searchQuery.ifEmpty { null },
+                            postUrl = ""
+                        )
                         viewMode = "photo"
                         postUrl = ""
                         halamanAktif = 1
@@ -177,12 +223,22 @@ fun DesainLayarUtama(
                         viewMode = viewMode,
                         items = daftarFoto,
                         onItemClick = { diklik ->
-                            // Kalau lagi mode album, klik card akan masuk ke mode Grid dan pasang PostUrl-nya
                             if (viewMode == "album") {
-                                // Cari url aslinya dari data API berdasarkan indeks/cocokin
                                 val indexData = daftarFoto.indexOf(diklik)
                                 if (indexData != -1) {
-                                    postUrl = viewModel.fotoList[indexData].postUrl ?: ""
+                                    val targetPostUrl = viewModel.fotoList[indexData].postUrl ?: ""
+                                    val targetNickname = diklik.member.lowercase()
+                                    viewModel.fetchPhotos(
+                                        page = 1,
+                                        size = 28,
+                                        source = activePlatform,
+                                        nickname = targetNickname,
+                                        mode = "photo",
+                                        search = searchQuery.ifEmpty { null },
+                                        postUrl = targetPostUrl
+                                    )
+
+                                    postUrl = targetPostUrl
                                     viewMode = "photo"
                                     halamanAktif = 1
                                     activeMemberName = diklik.member.lowercase()

@@ -26,10 +26,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.decode.VideoFrameDecoder
+import coil.request.ImageRequest
+import coil.request.videoFrameMillis
 
 @Composable
 fun GalleryGrid(
@@ -130,6 +136,7 @@ fun GridSquareItem(
     onClick: (GalleryItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Box(
         modifier = modifier
             .aspectRatio(1f) // Bikin jadi persegi sama sisi
@@ -137,9 +144,19 @@ fun GridSquareItem(
             .border(1.dp, Color.White.copy(alpha = 0.07f), RoundedCornerShape(12.dp))
             .clickable { onClick(item) }
     ) {
-        // Thumbnail Gambar/Video
+
+        val imageModel = if (item.isVideo) {
+            ImageRequest.Builder(context)
+                .data(item.imageUrl)
+                .decoderFactory(VideoFrameDecoder.Factory())
+                .videoFrameMillis(1000)
+                .build()
+        } else {
+            item.imageUrl
+        }
+
         coil.compose.AsyncImage(
-            model = item.imageUrl,
+            model = imageModel,
             contentDescription = item.caption,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -149,17 +166,16 @@ fun GridSquareItem(
         if (item.isVideo) {
             Box(
                 modifier = Modifier
-                    .padding(6.dp)
                     .align(Alignment.TopStart)
                     .background(Color(0xFFEE1D52).copy(alpha = 0.85f), RoundedCornerShape(50))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                    .padding(horizontal = 5.dp, vertical = 5.dp)
             ) {
                 Text(
                     text = "▶ VIDEO",
                     color = Color.White,
                     fontSize = 8.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
+                    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                 )
             }
         }

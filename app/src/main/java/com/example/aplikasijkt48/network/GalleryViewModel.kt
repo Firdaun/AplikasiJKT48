@@ -8,14 +8,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
+data class CacheEntry(
+    val fotoList: List<PhotoItem>,
+    val pagingInfo: PagingInfo?,
+    val timestamp: Long
+)
 class GalleryViewModel : ViewModel() {
-    // State persis kayak di React: isLoading, data, errorMessage
     var fotoList by mutableStateOf<List<PhotoItem>>(emptyList())
     var pagingInfo by mutableStateOf<PagingInfo?>(null)
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
-    // Fungsi utama buat narik data
+    private val cacheMap = mutableMapOf<String, CacheEntry>()
+    private val cacheDuration = 15 * 60 * 1000L
+
     fun fetchPhotos(
         page: Int = 1,
         size: Int = 8,
@@ -23,15 +29,34 @@ class GalleryViewModel : ViewModel() {
         nickname: String? = null,
         mode: String? = null,
         search: String? = null,
-        postUrl: String? = null
+        postUrl: String? = null,
+        forceRefresh: Boolean = false
     ) {
-        // viewModelScope ini buat ngoding Asynchronous (pengganti async/await JS)
+        val cacheKey = "page=$page|size=$size|src=$source|nick=$nickname|mode=$mode|search=$search|url=$postUrl"
+        val currentTime = System.currentTimeMillis()
+
+        val existingCache = cacheMap[cacheKey]
+        if (!forceRefresh && existingCache != null && (currentTime - existingCache.timestamp < cacheDuration)) {
+            Log.d("API_CACHE", "Halaman/Filter ini sudah ada di RAM! Langsung tampilin tanpa nembak API. ($cacheKey)")
+
+            fotoList = existingCache.fotoList
+            pagingInfo = existingCache.pagingInfo
+            isLoading = false
+
+            return
+        }
+
+        if (!forceRefresh) {
+            fotoList = emptyList()
+            isLoading = true
+        }
+        errorMessage = null
+
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
 
             try {
-                // Nembak API pakai mesin Retrofit tadi
                 val response = ApiClient.instance.getPublicPhotos(
                     page = page,
                     size = size,
@@ -42,12 +67,17 @@ class GalleryViewModel : ViewModel() {
                     postUrl = if (postUrl == "") null else postUrl
                 )
 
-                // Kalau berhasil, simpan datanya ke State
                 fotoList = response.data
                 pagingInfo = response.paging
 
+                cacheMap[cacheKey] = CacheEntry(
+                    fotoList = response.data,
+                    pagingInfo = response.paging,
+                    timestamp = currentTime
+                )
+                Log.d("API_CACHE", "Berhasil nembak API. Data disimpan ke RAM untuk ($cacheKey)")
+
             } catch (e: Exception) {
-                // Kalau gagal (laptop mati, wifi putus, dll)
                 errorMessage = e.message
                 Log.e("API_ERROR", "Gagal narik data: ${e.message}")
             } finally {
