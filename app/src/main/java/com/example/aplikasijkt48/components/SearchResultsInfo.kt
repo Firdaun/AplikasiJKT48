@@ -77,7 +77,7 @@ fun SearchResultsInfo(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Tombol 2: Show Member Photos (Hanya muncul jika kondisi terpenuhi)
-            if (nickname.isNotEmpty() && postUrl.isNotEmpty() && globalAlbumCount > 1) {
+            if (nickname.isNotEmpty() && postUrl.isNotEmpty() && globalAlbumCount > 1 && viewMode == "photo") {
                 Text(
                     text = "show $nickname's photos".uppercase(),
                     color = Color.White.copy(alpha = 0.35f),

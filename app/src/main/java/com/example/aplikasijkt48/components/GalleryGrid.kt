@@ -47,7 +47,6 @@ fun GalleryGrid(
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp > 768
 
-    // --- KONDISI 1: JIKA DATA KOSONG ---
     if (items.isEmpty()) {
         Column(
             modifier = modifier
@@ -72,9 +71,8 @@ fun GalleryGrid(
         return
     }
 
-    // --- KONDISI 2: MODE GRID (Kotak-kotak kecil ala IG) ---
     if (viewMode == "photo") {
-        val columns = if (isTablet) 5 else 3 // Tablet 5 kolom, HP 3 kolom
+        val columns = if (isTablet) 5 else 3
 
         Column(
             modifier = modifier.fillMaxWidth(),
@@ -92,7 +90,7 @@ fun GalleryGrid(
                             modifier = Modifier.weight(1f)
                         )
                     }
-                    // Isi ruang kosong kalau jumlah foto di baris terakhir kurang dari jumlah kolom
+
                     repeat(columns - rowItems.size) {
                         Spacer(modifier = Modifier.weight(1f))
                     }

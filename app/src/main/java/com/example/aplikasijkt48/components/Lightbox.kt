@@ -4,35 +4,49 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,19 +64,35 @@ fun Lightbox(
     onNavigate: (GalleryItem) -> Unit
 ) {
     val context = LocalContext.current
-    val currentIndex = allItems.indexOf(item)
     var showCaption by remember { mutableStateOf(true) }
+
+    // 1. Mengatur Pager (Slider) untuk fitur Swipe
+    val initialIndex = remember { allItems.indexOf(item).coerceAtLeast(0) }
+    val pagerState = rememberPagerState(
+        initialPage = initialIndex,
+        pageCount = { allItems.size }
+    )
+
+    // Data dari foto yang SEDANG DILIHAT saat ini
+    val currentItem = allItems[pagerState.currentPage]
 
     BackHandler { onClose() }
 
-    LaunchedEffect(item, showCaption) {
-        if (showCaption) {
-            delay(2000)
-            showCaption = false
-        }
+    // Sinkronisasi dengan parent (LayarUtama) & Reset Timer saat user menggeser (swipe)
+    LaunchedEffect(pagerState.currentPage) {
+        onNavigate(currentItem)
+        showCaption = true
     }
 
-    val platformColor = when (item.platform.lowercase()) {
+    // Auto-Hide Caption dalam 2 detik
+//    LaunchedEffect(pagerState.currentPage, showCaption) {
+//        if (showCaption) {
+//            delay(2000)
+//            showCaption = false
+//        }
+//    }
+
+    val platformColor = when (currentItem.platform.lowercase()) {
         "instagram" -> Color(0xFFE1306C)
         "tiktok" -> Color(0xFFEE1D52)
         "x", "twitter" -> Color(0xFF1DA1F2)
@@ -73,45 +103,46 @@ fun Lightbox(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xD904040A))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                showCaption = !showCaption
-            }
     ) {
-        Box(
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 80.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            val imageModel = if (item.isVideo) {
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    showCaption = !showCaption
+                }
+        ) { page ->
+            val pageItem = allItems[page]
+
+            val imageModel = if (pageItem.isVideo) {
                 ImageRequest.Builder(context)
-                    .data(item.imageUrl)
+                    .data(pageItem.imageUrl)
                     .decoderFactory(VideoFrameDecoder.Factory())
                     .videoFrameMillis(1000)
                     .build()
             } else {
-                item.imageUrl
+                pageItem.imageUrl
             }
 
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.85f)
-                    .clip(RoundedCornerShape(20.dp))
-                    .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(20.dp)),
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .padding(bottom = 260.dp),
                 contentAlignment = Alignment.Center
             ) {
+                // FOTO FULL WIDTH
                 coil.compose.AsyncImage(
                     model = imageModel,
                     contentDescription = "Preview",
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                if (item.isVideo) {
+                if (pageItem.isVideo) {
                     Icon(
                         imageVector = Icons.Default.PlayCircleOutline,
                         contentDescription = "Play Video",
@@ -119,187 +150,167 @@ fun Lightbox(
                         modifier = Modifier.size(64.dp)
                     )
                 }
-
-                AnimatedVisibility(
-                    visible = showCaption,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xA60A0A14), RoundedCornerShape(16.dp))
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                            .padding(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    text = item.platform,
-                                    color = platformColor,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .background(platformColor.copy(alpha = 0.15f), RoundedCornerShape(50))
-                                        .border(1.dp, platformColor.copy(alpha = 0.3f), RoundedCornerShape(50))
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                                Text(
-                                    text = "@${item.member.lowercase()}",
-                                    color = Color.White.copy(alpha = 0.4f),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                            Text(
-                                text = item.date,
-                                color = Color.White.copy(alpha = 0.35f),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Text(
-                            text = item.caption.takeIf { it.isNotBlank() } ?: "Tanpa caption",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis,
-                            lineHeight = 18.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.1f)))
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(Color.White.copy(alpha = 0.1f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
-                                    .clickable {
-                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "text/plain"
-                                            putExtra(Intent.EXTRA_TEXT, "Lihat post JKT48 ini: ${item.postUrl}")
-                                        }
-                                        context.startActivity(Intent.createChooser(shareIntent, "Bagikan via"))
-                                    }
-                                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(Icons.Default.Share, "Share", tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(12.dp))
-                                Text("Share", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                            }
-
-                            if (item.postUrl.isNotEmpty()) {
-                                Row(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(50))
-                                        .background(Color(0xFFEE1D52).copy(alpha = 0.1f))
-                                        .border(1.dp, Color(0xFFEE1D52).copy(alpha = 0.3f), RoundedCornerShape(50))
-                                        .clickable {
-                                            val openIntent = Intent(Intent.ACTION_VIEW, Uri.parse(item.postUrl))
-                                            context.startActivity(openIntent)
-                                        }
-                                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(Icons.Default.OpenInNew, "View", tint = Color(0xFFEE1D52), modifier = Modifier.size(12.dp))
-                                    Text("View Post", color = Color(0xFFEE1D52), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                if (currentIndex > 0) {
-                    IconButton(
-                        onClick = { onNavigate(allItems[currentIndex - 1]) },
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White.copy(alpha = 0.1f)),
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Prev", tint = Color.White)
-                    }
-                } else Spacer(modifier = Modifier.size(48.dp))
-
-                if (currentIndex < allItems.lastIndex) {
-                    IconButton(
-                        onClick = { onNavigate(allItems[currentIndex + 1]) },
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White.copy(alpha = 0.1f)),
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Next", tint = Color.White)
-                    }
-                } else Spacer(modifier = Modifier.size(48.dp))
             }
         }
 
-        Column(
+        // --- 3. OVERLAY CAPTION & TOMBOL (Mengikuti Foto Saat Ini) ---
+        AnimatedVisibility(
+            visible = showCaption,
+            enter = fadeIn(),
+            exit = fadeOut(),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .navigationBarsPadding()
+                .padding(bottom = 50.dp) // Mengangkat caption agar tidak menabrak tombol Close
+                .padding(horizontal = 16.dp)
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                val start = maxOf(0, currentIndex - 3)
-                val end = minOf(allItems.size, currentIndex + 4)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xA60A0A14), RoundedCornerShape(16.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = currentItem.platform,
+                            color = platformColor,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .background(platformColor.copy(alpha = 0.15f), RoundedCornerShape(50))
+                                .border(1.dp, platformColor.copy(alpha = 0.3f), RoundedCornerShape(50))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                        Text(
+                            text = "@${currentItem.member.lowercase()}",
+                            color = Color.White.copy(alpha = 0.4f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    Text(
+                        text = currentItem.date,
+                        color = Color.White.copy(alpha = 0.35f),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
 
-                for (i in start until end) {
-                    val isCurrent = i == currentIndex
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = currentItem.caption.takeIf { it.isNotBlank() } ?: "Tanpa caption",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 18.sp
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.1f)))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.White.copy(alpha = 0.1f))
+                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
+                            .clickable {
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, "Lihat post JKT48 ini: ${currentItem.postUrl}")
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, "Bagikan via"))
+                            }
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(Icons.Default.Share, "Share", tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(12.dp))
+                        Text("Share", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
+
+                    if (currentItem.postUrl.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(Color(0xFFEE1D52).copy(alpha = 0.1f))
+                                .border(1.dp, Color(0xFFEE1D52).copy(alpha = 0.3f), RoundedCornerShape(50))
+                                .clickable {
+                                    val openIntent = Intent(Intent.ACTION_VIEW, Uri.parse(currentItem.postUrl))
+                                    context.startActivity(openIntent)
+                                }
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(Icons.Default.OpenInNew, "View", tint = Color(0xFFEE1D52), modifier = Modifier.size(12.dp))
+                            Text("View Post", color = Color(0xFFEE1D52), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 4. INDIKATOR DOTS & TOMBOL CLOSE (Di bawah layar) ---
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val totalDots = allItems.size
+            val activeDot = pagerState.currentPage
+            val maxVisibleDots = 7
+
+            val start = if (totalDots <= maxVisibleDots) 0 else {
+                maxOf(0, minOf(activeDot - 3, totalDots - maxVisibleDots))
+            }
+            val end = if (totalDots <= maxVisibleDots) totalDots else {
+                minOf(totalDots, start + maxVisibleDots)
+            }
+
+            for (i in start until end) {
+                // 👇 TAMBAHKAN key(i) DI SINI 👇
+                androidx.compose.runtime.key(i) {
+
+                    val isCurrent = i == activeDot
+
+                    // 1. Animasi pelebaran Dot
+                    val dotWidth by animateDpAsState(
+                        targetValue = if (isCurrent) 24.dp else 6.dp,
+                        label = "dotWidth"
+                    )
+                    // 2. Animasi perubahan warna Dot
+                    val dotColor by animateColorAsState(
+                        targetValue = if (isCurrent) Color(0xFFEE1D52) else Color.White.copy(alpha = 0.3f),
+                        label = "dotColor"
+                    )
+
                     Box(
                         modifier = Modifier
                             .height(6.dp)
-                            .width(if (isCurrent) 24.dp else 6.dp)
+                            .width(dotWidth)
                             .clip(CircleShape)
-                            .background(if (isCurrent) Color(0xFFEE1D52) else Color.White.copy(alpha = 0.2f))
+                            .background(dotColor)
                     )
                 }
-            }
-
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(Color.White.copy(alpha = 0.1f))
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
-                    .clickable { onClose() }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(Icons.Default.Close, "Close", tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
-                Text(
-                    text = "Close",
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-                )
             }
         }
     }
