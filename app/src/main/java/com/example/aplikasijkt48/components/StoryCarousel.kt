@@ -62,7 +62,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.aplikasijkt48.DesainLayarUtama
+import com.example.aplikasijkt48.MainScreen
 import com.example.aplikasijkt48.data.GalleryData
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 
@@ -401,6 +401,6 @@ fun StoryCarousel(
 @Composable
 fun Preview() {
     AplikasiJKT48Theme {
-        DesainLayarUtama()
+        MainScreen()
     }
 }

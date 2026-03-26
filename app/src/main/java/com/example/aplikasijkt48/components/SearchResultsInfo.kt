@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun InfoHasilPencarian(
+fun SearchResultsInfo(
     nickname: String,
     viewMode: String,
     totalItem: Int,

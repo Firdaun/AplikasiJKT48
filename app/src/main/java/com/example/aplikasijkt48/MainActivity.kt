@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             AplikasiJKT48Theme {
-                DesainLayarUtama()
+                MainScreen()
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.example.aplikasijkt48
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,8 +40,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aplikasijkt48.components.FloatingControlBar
 import com.example.aplikasijkt48.components.GalleryGrid
 import com.example.aplikasijkt48.components.GalleryItem
-import com.example.aplikasijkt48.components.InfoHasilPencarian
+import com.example.aplikasijkt48.components.Lightbox
 import com.example.aplikasijkt48.components.Pagination
+import com.example.aplikasijkt48.components.SearchResultsInfo
 import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
 import com.example.aplikasijkt48.network.GalleryViewModel
@@ -49,7 +51,7 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DesainLayarUtama(
+fun MainScreen(
     viewModel: GalleryViewModel = viewModel()
 ) {
     Scaffold(
@@ -63,28 +65,31 @@ fun DesainLayarUtama(
         var viewMode by remember { mutableStateOf("album") }
         var activePlatform by remember { mutableStateOf("all") }
         var searchQuery by remember { mutableStateOf("") }
-        var halamanAktif by remember { mutableIntStateOf(1) }
+        var currentPage by remember { mutableIntStateOf(1) }
         var postUrl by remember { mutableStateOf("") }
+
         var isRefreshing by remember { mutableStateOf(false) }
+        var lightboxItem by remember { mutableStateOf<GalleryItem?>(null) }
         val pullRefreshState = rememberPullToRefreshState()
 
-        val daftarFoto = viewModel.fotoList.map { apiData ->
+        val galleryItems = viewModel.fotoList.map { apiData ->
             GalleryItem(
                 platform = apiData.source,
                 isVideo = apiData.mediaType == "VIDEO" || apiData.srcUrl.endsWith(".mp4"),
                 imageUrl = "http://192.168.1.7:3000${apiData.srcUrl}",
                 caption = apiData.caption ?: "Tanpa Caption",
                 date = apiData.postedAt.take(10),
-                member = apiData.member?.nickname ?: "JKT48"
+                member = apiData.member?.nickname ?: "JKT48",
+                postUrl = apiData.postUrl ?: ""
             )
         }
 
-        val totalItem = viewModel.pagingInfo?.totalItem ?: 0
-        val totalPages = viewModel.pagingInfo?.totalPage ?: 1
+        val totalItemsCount = viewModel.pagingInfo?.totalItem ?: 0
+        val totalPagesCount = viewModel.pagingInfo?.totalPage ?: 1
         val globalAlbumCount = 5
 
-        fun tarikDataInstan(
-            targetPage: Int = halamanAktif,
+        fun fetchGalleryData(
+            targetPage: Int = currentPage,
             targetMode: String = viewMode,
             targetNickname: String = activeMemberName,
             targetUrl: String = postUrl,
@@ -105,13 +110,13 @@ fun DesainLayarUtama(
         }
 
         LaunchedEffect(Unit) {
-            tarikDataInstan()
+            fetchGalleryData()
         }
 
         LaunchedEffect(searchQuery) {
             if (searchQuery.isNotEmpty()) {
                 delay(300)
-                tarikDataInstan()
+                fetchGalleryData()
             }
         }
 
@@ -122,7 +127,7 @@ fun DesainLayarUtama(
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
-            DekorasiLatarBelakang()
+            BackgroundDecoration()
 
             PullToRefreshBox(
                 modifier = Modifier
@@ -133,7 +138,7 @@ fun DesainLayarUtama(
                 onRefresh = {
                     isRefreshing = true
 
-                    tarikDataInstan(isRefresh = true)
+                    fetchGalleryData(isRefresh = true)
                 }
             ) {
                 Column(
@@ -146,11 +151,11 @@ fun DesainLayarUtama(
                     StoryCarousel(
                         modifier = Modifier.padding(top = 20.dp),
                         activeMember = activeMemberName,
-                        onSelectMember = { namaMember ->
-                            tarikDataInstan(targetNickname = namaMember, targetSearch = "", targetPage = 1)
-                            activeMemberName = namaMember
+                        onSelectMember = { memberName ->
+                            fetchGalleryData(targetNickname = memberName, targetSearch = "", targetPage = 1)
+                            activeMemberName = memberName
                             searchQuery = ""
-                            halamanAktif = 1
+                            currentPage = 1
                         }
                     )
 
@@ -159,51 +164,50 @@ fun DesainLayarUtama(
                     FloatingControlBar(
                         viewMode = viewMode,
                         onViewModeChange = {
-                            tarikDataInstan(targetPage = 1, targetMode = it)
-
+                            fetchGalleryData(targetPage = 1, targetMode = it)
                             viewMode = it
-                            halamanAktif = 1
+                            currentPage = 1
                         },
                         activePlatform = activePlatform,
                         onPlatformChange = {
-                            tarikDataInstan(targetPlatform = it, targetPage = 1)
+                            fetchGalleryData(targetPlatform = it, targetPage = 1)
                             activePlatform = it
-                            halamanAktif = 1
+                            currentPage = 1
                         },
                         searchQuery = searchQuery,
                         onSearchChange = {
                             searchQuery = it
                             activeMemberName = it.lowercase().trim()
-                            halamanAktif = 1
+                            currentPage = 1
                         },
                         onClear = {
-                            tarikDataInstan(targetNickname = "", targetSearch = "", targetPage = 1)
+                            fetchGalleryData(targetNickname = "", targetSearch = "", targetPage = 1)
                             searchQuery = ""
                             activeMemberName = ""
-                            halamanAktif = 1
+                            currentPage = 1
                         }
                     )
 
                     Spacer(modifier = Modifier.height(13.dp))
 
-                    InfoHasilPencarian(
+                    SearchResultsInfo(
                         nickname = activeMemberName,
                         viewMode = viewMode,
-                        totalItem = totalItem,
+                        totalItem = totalItemsCount,
                         postUrl = postUrl,
                         globalAlbumCount = globalAlbumCount,
                         onShowAllClick = {
-                            tarikDataInstan(targetNickname = "", targetSearch = "", targetUrl = "", targetPage = 1)
+                            fetchGalleryData(targetNickname = "", targetSearch = "", targetUrl = "", targetPage = 1)
                             activeMemberName = ""
                             searchQuery = ""
                             postUrl = ""
-                            halamanAktif = 1
+                            currentPage = 1
                         },
                         onShowMemberPhotosClick = {
-                            tarikDataInstan(targetPage = 1, targetMode = "photo", targetUrl = "")
+                            fetchGalleryData(targetPage = 1, targetMode = "photo", targetUrl = "")
                             viewMode = "photo"
                             postUrl = ""
-                            halamanAktif = 1
+                            currentPage = 1
                         }
                     )
 
@@ -227,15 +231,15 @@ fun DesainLayarUtama(
                     } else {
                         GalleryGrid(
                             viewMode = viewMode,
-                            items = daftarFoto,
-                            onItemClick = { diklik ->
+                            items = galleryItems,
+                            onItemClick = { onClick ->
                                 if (viewMode == "album") {
-                                    val indexData = daftarFoto.indexOf(diklik)
+                                    val indexData = galleryItems.indexOf(onClick)
                                     if (indexData != -1) {
                                         val targetPostUrl =
                                             viewModel.fotoList[indexData].postUrl ?: ""
-                                        val targetNickname = diklik.member.lowercase()
-                                        tarikDataInstan(
+                                        val targetNickname = onClick.member.lowercase()
+                                        fetchGalleryData(
                                             targetPage = 1,
                                             targetMode = "photo",
                                             targetNickname = targetNickname,
@@ -244,9 +248,11 @@ fun DesainLayarUtama(
 
                                         postUrl = targetPostUrl
                                         viewMode = "photo"
-                                        halamanAktif = 1
-                                        activeMemberName = diklik.member.lowercase()
+                                        currentPage = 1
+                                        activeMemberName = onClick.member.lowercase()
                                     }
+                                }else {
+                                    lightboxItem = onClick
                                 }
                             }
                         )
@@ -254,15 +260,29 @@ fun DesainLayarUtama(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    if (totalPages > 1) {
+                    if (totalPagesCount > 1) {
                         Pagination(
-                            currentPage = halamanAktif,
-                            totalPages = totalPages,
+                            currentPage = currentPage,
+                            totalPages = totalPagesCount,
                             onPageChange = { halamanBaru ->
-                                tarikDataInstan(targetPage = halamanBaru)
+                                fetchGalleryData(targetPage = halamanBaru)
 
-                                halamanAktif = halamanBaru
+                                currentPage = halamanBaru
                             }
+                        )
+                    }
+                }
+                AnimatedVisibility(
+                    visible = lightboxItem != null,
+                    enter = androidx.compose.animation.fadeIn(),
+                    exit = androidx.compose.animation.fadeOut()
+                ) {
+                    lightboxItem?.let { item ->
+                        Lightbox(
+                            item = item,
+                            allItems = galleryItems,
+                            onClose = { lightboxItem = null },
+                            onNavigate = { itemBaru -> lightboxItem = itemBaru }
                         )
                     }
                 }
@@ -273,7 +293,7 @@ fun DesainLayarUtama(
 }
 
 @Composable
-fun DekorasiLatarBelakang() {
+fun BackgroundDecoration() {
     Box(modifier = Modifier.fillMaxSize()) {
 
         Box(
@@ -334,6 +354,6 @@ fun DekorasiLatarBelakang() {
 @Composable
 fun DesainLayarUtamaPreview() {
     AplikasiJKT48Theme {
-        DesainLayarUtama()
+        MainScreen()
     }
 }
