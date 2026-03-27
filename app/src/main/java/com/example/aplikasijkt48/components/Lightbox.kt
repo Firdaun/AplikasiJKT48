@@ -17,14 +17,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -66,7 +69,6 @@ fun Lightbox(
     val context = LocalContext.current
     var showCaption by remember { mutableStateOf(true) }
 
-    // 1. Mengatur Pager (Slider) untuk fitur Swipe
     val initialIndex = remember { allItems.indexOf(item).coerceAtLeast(0) }
     val pagerState = rememberPagerState(
         initialPage = initialIndex,
@@ -113,7 +115,7 @@ fun Lightbox(
                     indication = null
                 ) {
                     showCaption = !showCaption
-                }
+                },
         ) { page ->
             val pageItem = allItems[page]
 
@@ -126,20 +128,23 @@ fun Lightbox(
             } else {
                 pageItem.imageUrl
             }
-
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
                     .statusBarsPadding()
-                    .padding(bottom = 260.dp),
-                contentAlignment = Alignment.Center
+                    .width(200.dp)
+                    .height(600.dp)
+                    .offset(y = (-130).dp),
+                contentAlignment = Alignment.Center,
             ) {
-                // FOTO FULL WIDTH
                 coil.compose.AsyncImage(
                     model = imageModel,
                     contentDescription = "Preview",
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .wrapContentWidth()
+                        .clip(RoundedCornerShape(16.dp))
+
                 )
 
                 if (pageItem.isVideo) {
@@ -160,8 +165,7 @@ fun Lightbox(
             exit = fadeOut(),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 50.dp) // Mengangkat caption agar tidak menabrak tombol Close
+                .padding(bottom = 115.dp)
                 .padding(horizontal = 16.dp)
         ) {
             Column(
@@ -186,8 +190,15 @@ fun Lightbox(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
-                                .background(platformColor.copy(alpha = 0.15f), RoundedCornerShape(50))
-                                .border(1.dp, platformColor.copy(alpha = 0.3f), RoundedCornerShape(50))
+                                .background(
+                                    platformColor.copy(alpha = 0.15f),
+                                    RoundedCornerShape(50)
+                                )
+                                .border(
+                                    1.dp,
+                                    platformColor.copy(alpha = 0.3f),
+                                    RoundedCornerShape(50)
+                                )
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                         Text(
@@ -217,7 +228,12 @@ fun Lightbox(
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.1f)))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Color.White.copy(alpha = 0.1f))
+                )
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
@@ -232,16 +248,34 @@ fun Lightbox(
                             .clickable {
                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, "Lihat post JKT48 ini: ${currentItem.postUrl}")
+                                    putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        "Lihat post JKT48 ini: ${currentItem.postUrl}"
+                                    )
                                 }
-                                context.startActivity(Intent.createChooser(shareIntent, "Bagikan via"))
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        shareIntent,
+                                        "Bagikan via"
+                                    )
+                                )
                             }
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Icon(Icons.Default.Share, "Share", tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(12.dp))
-                        Text("Share", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        Icon(
+                            Icons.Default.Share,
+                            "Share",
+                            tint = Color.White.copy(alpha = 0.6f),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            "Share",
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
 
                     if (currentItem.postUrl.isNotEmpty()) {
@@ -249,17 +283,32 @@ fun Lightbox(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
                                 .background(Color(0xFFEE1D52).copy(alpha = 0.1f))
-                                .border(1.dp, Color(0xFFEE1D52).copy(alpha = 0.3f), RoundedCornerShape(50))
+                                .border(
+                                    1.dp,
+                                    Color(0xFFEE1D52).copy(alpha = 0.3f),
+                                    RoundedCornerShape(50)
+                                )
                                 .clickable {
-                                    val openIntent = Intent(Intent.ACTION_VIEW, Uri.parse(currentItem.postUrl))
+                                    val openIntent =
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(currentItem.postUrl))
                                     context.startActivity(openIntent)
                                 }
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Icon(Icons.Default.OpenInNew, "View", tint = Color(0xFFEE1D52), modifier = Modifier.size(12.dp))
-                            Text("View Post", color = Color(0xFFEE1D52), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                            Icon(
+                                Icons.Default.OpenInNew,
+                                "View",
+                                tint = Color(0xFFEE1D52),
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                "View Post",
+                                color = Color(0xFFEE1D52),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
                 }

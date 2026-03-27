@@ -22,7 +22,7 @@ interface ApiService {
 }
 
 object ApiClient {
-    private const val BASE_URL = "http://192.168.1.7:3000/"
+    private const val BASE_URL = "${ApiConfig.BASE_URL}/"
 
     val instance: ApiService by lazy {
         val loggingInterceptor = HttpLoggingInterceptor().apply {

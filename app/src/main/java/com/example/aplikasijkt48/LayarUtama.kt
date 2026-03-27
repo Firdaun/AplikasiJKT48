@@ -47,6 +47,7 @@ import com.example.aplikasijkt48.components.Pagination
 import com.example.aplikasijkt48.components.SearchResultsInfo
 import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
+import com.example.aplikasijkt48.network.ApiConfig
 import com.example.aplikasijkt48.network.GalleryViewModel
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 import kotlinx.coroutines.delay
@@ -76,7 +77,7 @@ fun MainScreen(
         GalleryItem(
             platform = apiData.source,
             isVideo = apiData.mediaType == "VIDEO" || apiData.srcUrl.endsWith(".mp4"),
-            imageUrl = "http://192.168.1.7:3000${apiData.srcUrl}",
+            imageUrl = "${ApiConfig.BASE_URL}${apiData.srcUrl}",
             caption = apiData.caption ?: "Tanpa Caption",
             date = apiData.postedAt.take(10),
             member = apiData.member?.nickname ?: "JKT48",
