@@ -108,6 +108,7 @@ fun Lightbox(
     ) {
         HorizontalPager(
             state = pagerState,
+            pageSpacing = 16.dp,
             modifier = Modifier
                 .fillMaxSize()
                 .clickable(
@@ -131,7 +132,7 @@ fun Lightbox(
             Box(
                 modifier = Modifier
                     .statusBarsPadding()
-                    .width(200.dp)
+                    .fillMaxWidth()
                     .height(600.dp)
                     .offset(y = (-130).dp),
                 contentAlignment = Alignment.Center,
@@ -141,10 +142,7 @@ fun Lightbox(
                     contentDescription = "Preview",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .wrapContentWidth()
                         .clip(RoundedCornerShape(16.dp))
-
                 )
 
                 if (pageItem.isVideo) {
@@ -218,11 +216,13 @@ fun Lightbox(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                val cleanFromEnter = currentItem.caption.replace(Regex("\\s+"), " ").trim()
+
                 Text(
-                    text = currentItem.caption.takeIf { it.isNotBlank() } ?: "Tanpa caption",
+                    text = cleanFromEnter.takeIf { it.isNotBlank() } ?: "Tanpa caption",
                     color = Color.White,
                     fontSize = 12.sp,
-                    maxLines = 4,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 18.sp
                 )
@@ -320,7 +320,7 @@ fun Lightbox(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(bottom = 20.dp),
+                .padding(bottom = 50.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

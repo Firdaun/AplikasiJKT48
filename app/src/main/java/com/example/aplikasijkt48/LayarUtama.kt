@@ -95,16 +95,14 @@ fun MainScreen(
         targetNickname: String = activeMemberName,
         targetUrl: String = postUrl,
         targetPlatform: String = activePlatform,
-        targetSearch: String? = searchQuery.ifEmpty { null },
         isRefresh: Boolean = false
     ) {
         viewModel.fetchPhotos(
             page = targetPage,
-            size = if (targetMode == "album") 8 else 28,
+            size = if (targetMode == "album") 8 else 27,
             source = targetPlatform,
             nickname = targetNickname,
             mode = targetMode,
-            search = targetSearch,
             postUrl = targetUrl,
             forceRefresh = isRefresh
         )
@@ -168,7 +166,6 @@ fun MainScreen(
                                 onSelectMember = { memberName ->
                                     fetchGalleryData(
                                         targetNickname = memberName,
-                                        targetSearch = "",
                                         targetPage = 1
                                     )
                                     activeMemberName = memberName
@@ -205,7 +202,6 @@ fun MainScreen(
                                 onClear = {
                                     fetchGalleryData(
                                         targetNickname = "",
-                                        targetSearch = "",
                                         targetPage = 1
                                     )
                                     searchQuery = ""
@@ -225,7 +221,6 @@ fun MainScreen(
                                 onShowAllClick = {
                                     fetchGalleryData(
                                         targetNickname = "",
-                                        targetSearch = "",
                                         targetUrl = "",
                                         targetPage = 1
                                     )
