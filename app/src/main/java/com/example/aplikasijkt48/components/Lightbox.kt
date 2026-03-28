@@ -1,7 +1,8 @@
 package com.example.aplikasijkt48.components
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
+import android.view.LayoutInflater
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,18 +27,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.PlayCircleOutline
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,10 +54,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.decode.VideoFrameDecoder
-import coil.request.ImageRequest
-import coil.request.videoFrameMillis
-import kotlinx.coroutines.delay
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import com.example.aplikasijkt48.R
 
 @Composable
 fun Lightbox(
@@ -86,14 +89,6 @@ fun Lightbox(
         showCaption = true
     }
 
-    // Auto-Hide Caption dalam 2 detik
-//    LaunchedEffect(pagerState.currentPage, showCaption) {
-//        if (showCaption) {
-//            delay(2000)
-//            showCaption = false
-//        }
-//    }
-
     val platformColor = when (currentItem.platform.lowercase()) {
         "instagram" -> Color(0xFFE1306C)
         "tiktok" -> Color(0xFFEE1D52)
@@ -119,16 +114,6 @@ fun Lightbox(
                 },
         ) { page ->
             val pageItem = allItems[page]
-
-            val imageModel = if (pageItem.isVideo) {
-                ImageRequest.Builder(context)
-                    .data(pageItem.imageUrl)
-                    .decoderFactory(VideoFrameDecoder.Factory())
-                    .videoFrameMillis(1000)
-                    .build()
-            } else {
-                pageItem.imageUrl
-            }
             Box(
                 modifier = Modifier
                     .statusBarsPadding()
@@ -137,20 +122,20 @@ fun Lightbox(
                     .offset(y = (-130).dp),
                 contentAlignment = Alignment.Center,
             ) {
-                coil.compose.AsyncImage(
-                    model = imageModel,
-                    contentDescription = "Preview",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                )
-
                 if (pageItem.isVideo) {
-                    Icon(
-                        imageVector = Icons.Default.PlayCircleOutline,
-                        contentDescription = "Play Video",
-                        tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(64.dp)
+                    val isCurrentPage = page == pagerState.currentPage
+                    ExoVideoPlayer(
+                        videoUrl = pageItem.imageUrl,
+                        isCurrentPage = isCurrentPage,
+                        modifier = Modifier.clip(RoundedCornerShape(16.dp))
+                    )
+                } else {
+                    val imageModel = pageItem.imageUrl
+                    coil.compose.AsyncImage(
+                        model = imageModel,
+                        contentDescription = "Preview",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.clip(RoundedCornerShape(16.dp))
                     )
                 }
             }
@@ -290,7 +275,7 @@ fun Lightbox(
                                 )
                                 .clickable {
                                     val openIntent =
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(currentItem.postUrl))
+                                        Intent(Intent.ACTION_VIEW, currentItem.postUrl.toUri())
                                     context.startActivity(openIntent)
                                 }
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
@@ -298,7 +283,7 @@ fun Lightbox(
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Icon(
-                                Icons.Default.OpenInNew,
+                                Icons.AutoMirrored.Filled.OpenInNew,
                                 "View",
                                 tint = Color(0xFFEE1D52),
                                 modifier = Modifier.size(12.dp)
@@ -363,4 +348,103 @@ fun Lightbox(
             }
         }
     }
+}
+@SuppressLint("InflateParams")
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+@Composable
+fun ExoVideoPlayer(videoUrl: String, isCurrentPage: Boolean, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+
+    var isVideoEnded by remember {mutableStateOf(false)}
+    var isPlaying by remember { mutableStateOf(false) }
+
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(videoUrl))
+            prepare()
+
+            addListener(object: Player.Listener{
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_ENDED) {
+                        isVideoEnded = true
+                    }
+                }
+                override fun onIsPlayingChanged(playing: Boolean) {
+                    isPlaying = playing
+                }
+            })
+        }
+    }
+
+    LaunchedEffect(isCurrentPage) {
+        if (isCurrentPage) {
+            if (isVideoEnded) {
+                exoPlayer.seekTo(0)
+                isVideoEnded = false
+            }
+            exoPlayer.play()
+        } else {
+            exoPlayer.pause()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+
+            ){
+                if (isPlaying){
+                    exoPlayer.pause()
+                }else{
+                    if (isVideoEnded){
+                        exoPlayer.seekTo(0)
+                        isVideoEnded = false
+                    }
+                    exoPlayer.play()
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        AndroidView(
+            factory = { ctx ->
+                val inflater = LayoutInflater.from(ctx)
+                (inflater.inflate(R.layout.player_view_custom, null) as PlayerView).apply {
+                    useController = false
+                    controllerAutoShow = false
+                    isClickable = false
+                    isFocusable = false
+                }
+            },
+            update = { view ->
+                view.player = exoPlayer
+            },
+            modifier = modifier
+        )
+        AnimatedVisibility(
+            visible = !isPlaying || isVideoEnded,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier.size(100.dp), // Area sentuh/tampil diperbesar
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.PlayArrow,
+                    contentDescription = "Replay Video",
+                    tint = Color.White,
+                    modifier = Modifier.size(80.dp)
+                )
+            }
+        }
+    }
+
 }
