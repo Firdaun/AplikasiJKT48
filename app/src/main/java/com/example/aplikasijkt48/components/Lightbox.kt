@@ -41,8 +41,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -141,234 +143,247 @@ fun Lightbox(
             }
         }
 
-        // --- 3. OVERLAY CAPTION & TOMBOL (Mengikuti Foto Saat Ini) ---
-        AnimatedVisibility(
-            visible = showCaption,
-            enter = fadeIn(),
-            exit = fadeOut(),
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 115.dp)
-                .padding(horizontal = 16.dp)
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            AnimatedVisibility(
+                visible = showCaption,
+                enter = fadeIn(),
+                exit = fadeOut(),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xA60A0A14), RoundedCornerShape(16.dp))
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = currentItem.platform,
-                            color = platformColor,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .background(
-                                    platformColor.copy(alpha = 0.15f),
-                                    RoundedCornerShape(50)
-                                )
-                                .border(
-                                    1.dp,
-                                    platformColor.copy(alpha = 0.3f),
-                                    RoundedCornerShape(50)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                        Text(
-                            text = "@${currentItem.member.lowercase()}",
-                            color = Color.White.copy(alpha = 0.4f),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    Text(
-                        text = currentItem.date,
-                        color = Color.White.copy(alpha = 0.35f),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                val cleanFromEnter = currentItem.caption.replace(Regex("\\s+"), " ").trim()
-
-                Text(
-                    text = cleanFromEnter.takeIf { it.isNotBlank() } ?: "Tanpa caption",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 18.sp
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(1.dp)
-                        .background(Color.White.copy(alpha = 0.1f))
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .background(Color(0xA60A0A14), RoundedCornerShape(16.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                        .padding(16.dp)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(Color.White.copy(alpha = 0.1f))
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
-                            .clickable {
-                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        "Lihat post JKT48 ini: ${currentItem.postUrl}"
-                                    )
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        shareIntent,
-                                        "Bagikan via"
-                                    )
-                                )
-                            }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.Share,
-                            "Share",
-                            tint = Color.White.copy(alpha = 0.6f),
-                            modifier = Modifier.size(12.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = currentItem.platform,
+                                color = platformColor,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .background(
+                                        platformColor.copy(alpha = 0.15f),
+                                        RoundedCornerShape(50)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        platformColor.copy(alpha = 0.3f),
+                                        RoundedCornerShape(50)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                            Text(
+                                text = "@${currentItem.member.lowercase()}",
+                                color = Color.White.copy(alpha = 0.4f),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                         Text(
-                            "Share",
-                            color = Color.White.copy(alpha = 0.6f),
-                            fontSize = 11.sp,
+                            text = currentItem.date,
+                            color = Color.White.copy(alpha = 0.35f),
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
 
-                    if (currentItem.postUrl.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    val cleanFromEnter = currentItem.caption.replace(Regex("\\s+"), " ").trim()
+
+                    Text(
+                        text = cleanFromEnter.takeIf { it.isNotBlank() } ?: "Tanpa caption",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        lineHeight = 18.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(Color.White.copy(alpha = 0.1f))
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Row(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
-                                .background(Color(0xFFEE1D52).copy(alpha = 0.1f))
+                                .background(Color.White.copy(alpha = 0.1f))
                                 .border(
                                     1.dp,
-                                    Color(0xFFEE1D52).copy(alpha = 0.3f),
+                                    Color.White.copy(alpha = 0.1f),
                                     RoundedCornerShape(50)
                                 )
                                 .clickable {
-                                    val openIntent =
-                                        Intent(Intent.ACTION_VIEW, currentItem.postUrl.toUri())
-                                    context.startActivity(openIntent)
+                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(
+                                            Intent.EXTRA_TEXT,
+                                            "Lihat post JKT48 ini: ${currentItem.postUrl}"
+                                        )
+                                    }
+                                    context.startActivity(
+                                        Intent.createChooser(
+                                            shareIntent,
+                                            "Bagikan via"
+                                        )
+                                    )
                                 }
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Icon(
-                                Icons.AutoMirrored.Filled.OpenInNew,
-                                "View",
-                                tint = Color(0xFFEE1D52),
+                                Icons.Default.Share,
+                                "Share",
+                                tint = Color.White.copy(alpha = 0.6f),
                                 modifier = Modifier.size(12.dp)
                             )
                             Text(
-                                "View Post",
-                                color = Color(0xFFEE1D52),
+                                "Share",
+                                color = Color.White.copy(alpha = 0.6f),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
+
+                        if (currentItem.postUrl.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(Color(0xFFEE1D52).copy(alpha = 0.1f))
+                                    .border(
+                                        1.dp,
+                                        Color(0xFFEE1D52).copy(alpha = 0.3f),
+                                        RoundedCornerShape(50)
+                                    )
+                                    .clickable {
+                                        val openIntent =
+                                            Intent(Intent.ACTION_VIEW, currentItem.postUrl.toUri())
+                                        context.startActivity(openIntent)
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.OpenInNew,
+                                    "View",
+                                    tint = Color(0xFFEE1D52),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Text(
+                                    "View Post",
+                                    color = Color(0xFFEE1D52),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        // --- 4. INDIKATOR DOTS & TOMBOL CLOSE (Di bawah layar) ---
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 50.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val totalDots = allItems.size
-            val activeDot = pagerState.currentPage
-            val maxVisibleDots = 7
+            Spacer(modifier = Modifier.height(30.dp))
 
-            val start = if (totalDots <= maxVisibleDots) 0 else {
-                maxOf(0, minOf(activeDot - 3, totalDots - maxVisibleDots))
-            }
-            val end = if (totalDots <= maxVisibleDots) totalDots else {
-                minOf(totalDots, start + maxVisibleDots)
-            }
+            Row(
+                modifier = Modifier.navigationBarsPadding(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val totalDots = allItems.size
+                val activeDot = pagerState.currentPage
+                val maxVisibleDots = 7
 
-            for (i in start until end) {
-                // 👇 TAMBAHKAN key(i) DI SINI 👇
-                androidx.compose.runtime.key(i) {
+                val start = if (totalDots <= maxVisibleDots) 0 else {
+                    maxOf(0, minOf(activeDot - 3, totalDots - maxVisibleDots))
+                }
+                val end = if (totalDots <= maxVisibleDots) totalDots else {
+                    minOf(totalDots, start + maxVisibleDots)
+                }
 
-                    val isCurrent = i == activeDot
+                for (i in start until end) {
+                    androidx.compose.runtime.key(i) {
 
-                    // 1. Animasi pelebaran Dot
-                    val dotWidth by animateDpAsState(
-                        targetValue = if (isCurrent) 24.dp else 6.dp,
-                        label = "dotWidth"
-                    )
-                    // 2. Animasi perubahan warna Dot
-                    val dotColor by animateColorAsState(
-                        targetValue = if (isCurrent) Color(0xFFEE1D52) else Color.White.copy(alpha = 0.3f),
-                        label = "dotColor"
-                    )
+                        val isCurrent = i == activeDot
 
-                    Box(
-                        modifier = Modifier
-                            .height(6.dp)
-                            .width(dotWidth)
-                            .clip(CircleShape)
-                            .background(dotColor)
-                    )
+                        val dotWidth by animateDpAsState(
+                            targetValue = if (isCurrent) 24.dp else 6.dp,
+                            label = "dotWidth"
+                        )
+                        val dotColor by animateColorAsState(
+                            targetValue = if (isCurrent) Color(0xFFEE1D52) else Color.White.copy(
+                                alpha = 0.3f
+                            ),
+                            label = "dotColor"
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .height(6.dp)
+                                .width(dotWidth)
+                                .clip(CircleShape)
+                                .background(dotColor)
+                        )
+                    }
                 }
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }
-@SuppressLint("InflateParams")
+
+@SuppressLint("InflateParams", "AutoboxingStateCreation")
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun ExoVideoPlayer(videoUrl: String, isCurrentPage: Boolean, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
-    var isVideoEnded by remember {mutableStateOf(false)}
+    var isVideoEnded by remember { mutableStateOf(false) }
     var isPlaying by remember { mutableStateOf(false) }
+    var savedPosition by rememberSaveable { mutableLongStateOf(0L) }
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(videoUrl))
             prepare()
+            seekTo(savedPosition)
 
-            addListener(object: Player.Listener{
+            addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     if (playbackState == Player.STATE_ENDED) {
                         isVideoEnded = true
+                        this@apply.seekTo(0)
+                        this@apply.pause()
                     }
                 }
+
                 override fun onIsPlayingChanged(playing: Boolean) {
                     isPlaying = playing
                 }
@@ -390,6 +405,7 @@ fun ExoVideoPlayer(videoUrl: String, isCurrentPage: Boolean, modifier: Modifier 
 
     DisposableEffect(Unit) {
         onDispose {
+            savedPosition = exoPlayer.currentPosition
             exoPlayer.release()
         }
     }
@@ -400,11 +416,11 @@ fun ExoVideoPlayer(videoUrl: String, isCurrentPage: Boolean, modifier: Modifier 
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
 
-            ){
-                if (isPlaying){
+            ) {
+                if (isPlaying) {
                     exoPlayer.pause()
-                }else{
-                    if (isVideoEnded){
+                } else {
+                    if (isVideoEnded) {
                         exoPlayer.seekTo(0)
                         isVideoEnded = false
                     }
@@ -434,7 +450,7 @@ fun ExoVideoPlayer(videoUrl: String, isCurrentPage: Boolean, modifier: Modifier 
             exit = fadeOut(),
         ) {
             Box(
-                modifier = Modifier.size(100.dp), // Area sentuh/tampil diperbesar
+                modifier = Modifier.size(100.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
