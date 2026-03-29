@@ -269,8 +269,7 @@ fun MainScreen(
                                         if (viewMode == "album") {
                                             val indexData = galleryItems.indexOf(onClick)
                                             if (indexData != -1) {
-                                                val targetPostUrl =
-                                                    viewModel.fotoList[indexData].postUrl ?: ""
+                                                val targetPostUrl = viewModel.fotoList[indexData].postUrl ?: ""
                                                 val targetNickname = onClick.member.lowercase()
                                                 fetchGalleryData(
                                                     targetPage = 1,

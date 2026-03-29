@@ -2,7 +2,6 @@ package com.example.aplikasijkt48.components
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Configuration
 import android.view.LayoutInflater
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -53,13 +52,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -68,11 +64,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import com.example.aplikasijkt48.MainScreen
 import com.example.aplikasijkt48.R
-import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 import kotlinx.coroutines.delay
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun Lightbox(
     item: GalleryItem,
@@ -130,12 +125,20 @@ fun Lightbox(
                 },
         ) { page ->
             val pageItem = allItems[page]
+            val configuration = LocalConfiguration.current
+            val screenHeight = configuration.screenHeightDp
+            val dynamicOffset = if (screenHeight < 600) {
+                0.dp
+            } else {
+                (-100).dp
+            }
             Box(
                 modifier = Modifier
+                    .navigationBarsPadding()
                     .statusBarsPadding()
                     .fillMaxWidth()
                     .height(600.dp)
-                    .offset(y = (-100).dp),
+                    .offset(y = dynamicOffset),
                 contentAlignment = Alignment.Center,
             ) {
                 if (pageItem.isVideo) {
