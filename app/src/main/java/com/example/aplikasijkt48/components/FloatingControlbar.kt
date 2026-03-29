@@ -234,8 +234,8 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
     val fontSize = if (isTablet) 12.sp else 10.5.sp
     val platforms = listOf(
         Triple("all", "All", Icons.Default.Language),
-        Triple("instagram", "Instagram", Icons.Default.CameraAlt),
-        Triple("x", "X/Twitter", Icons.Default.Close)
+        Triple("instagram", "Instagram", getInstagramIcon()),
+        Triple("x", "X/Twitter", getXIcon())
     )
 
     Row(
