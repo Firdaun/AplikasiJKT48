@@ -3,6 +3,10 @@ package com.example.aplikasijkt48
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +35,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -64,6 +69,24 @@ fun MainScreen(
     var searchQuery by remember { mutableStateOf("") }
     var currentPage by remember { mutableIntStateOf(1) }
     var postUrl by remember { mutableStateOf("") }
+
+    val scrollState = rememberScrollState()
+    var isPaginationVisible by remember { mutableStateOf(true) }
+
+    LaunchedEffect(scrollState) {
+        var previousScroll = scrollState.value
+
+        snapshotFlow { scrollState.value }.collect { currentScroll ->
+            val delta = currentScroll - previousScroll
+
+            if (delta > 15) {
+                isPaginationVisible = false
+            } else if (delta < -15) {
+                isPaginationVisible = true
+            }
+            previousScroll = currentScroll
+        }
+    }
 
     var isRefreshing by remember { mutableStateOf(false) }
     var lightboxItem by remember { mutableStateOf<GalleryItem?>(null) }
@@ -158,7 +181,7 @@ fun MainScreen(
                             modifier = Modifier
                                 .padding(horizontal = 13.dp)
                                 .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
+                                .verticalScroll(scrollState),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             StoryCarousel(
@@ -270,7 +293,8 @@ fun MainScreen(
                                         if (viewMode == "album") {
                                             val indexData = galleryItems.indexOf(onClick)
                                             if (indexData != -1) {
-                                                val targetPostUrl = viewModel.fotoList[indexData].postUrl ?: ""
+                                                val targetPostUrl =
+                                                    viewModel.fotoList[indexData].postUrl ?: ""
                                                 val targetNickname = onClick.member.lowercase()
                                                 fetchGalleryData(
                                                     targetPage = 1,
@@ -291,28 +315,35 @@ fun MainScreen(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(50.dp))
+                            Spacer(modifier = Modifier.height(90.dp))
 
                         }
 
                     }
                     if (totalPagesCount > 1) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .navigationBarsPadding()
-                                .background(Color.Transparent)
+                        AnimatedVisibility(
+                            visible = isPaginationVisible,
+                            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                            modifier = Modifier.align(Alignment.BottomCenter)
                         ) {
-                            Pagination(
-                                currentPage = currentPage,
-                                totalPages = totalPagesCount,
-                                onPageChange = { halamanBaru ->
-                                    fetchGalleryData(targetPage = halamanBaru)
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .navigationBarsPadding()
+                                    .background(Color(0xFF07070F))
+                            ) {
+                                Pagination(
+                                    currentPage = currentPage,
+                                    totalPages = totalPagesCount,
+                                    onPageChange = { halamanBaru ->
+                                        fetchGalleryData(targetPage = halamanBaru)
 
-                                    currentPage = halamanBaru
-                                }
-                            )
+                                        currentPage = halamanBaru
+                                    }
+                                )
+                            }
                         }
                     }
 
@@ -322,8 +353,8 @@ fun MainScreen(
         }
         AnimatedVisibility(
             visible = lightboxItem != null,
-            enter = androidx.compose.animation.fadeIn(),
-            exit = androidx.compose.animation.fadeOut()
+            enter = fadeIn(),
+            exit = fadeOut()
         ) {
             lightboxItem?.let { item ->
                 Lightbox(
