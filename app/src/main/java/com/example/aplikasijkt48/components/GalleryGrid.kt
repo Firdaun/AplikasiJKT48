@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -75,7 +76,9 @@ fun GalleryGrid(
         val columns = if (isTablet) 5 else 3
 
         Column(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .navigationBarsPadding()
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items.chunked(columns).forEach { rowItems ->
@@ -103,7 +106,9 @@ fun GalleryGrid(
     val albumColumns = if (isTablet) 4 else 2
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .navigationBarsPadding()
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items.chunked(albumColumns).forEach { rowItems ->

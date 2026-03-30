@@ -2,11 +2,11 @@ package com.example.aplikasijkt48
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,13 +34,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,6 +63,7 @@ import com.example.aplikasijkt48.network.ApiConfig
 import com.example.aplikasijkt48.network.GalleryViewModel
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,21 +77,35 @@ fun MainScreen(
     var currentPage by remember { mutableIntStateOf(1) }
     var postUrl by remember { mutableStateOf("") }
 
-    val scrollState = rememberScrollState()
-    var isPaginationVisible by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
+    val tinggiPagination = 120.dp
+    val tinggiPaginationPx = with(LocalDensity.current) { tinggiPagination.roundToPx().toFloat() }
 
-    LaunchedEffect(scrollState) {
-        var previousScroll = scrollState.value
+    val offsetAnimatable = remember { Animatable(0f) }
 
-        snapshotFlow { scrollState.value }.collect { currentScroll ->
-            val delta = currentScroll - previousScroll
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
 
-            if (delta > 15) {
-                isPaginationVisible = false
-            } else if (delta < -15) {
-                isPaginationVisible = true
+                if (delta < -10f && offsetAnimatable.targetValue != tinggiPaginationPx) {
+                    coroutineScope.launch {
+                        offsetAnimatable.animateTo(
+                            targetValue = tinggiPaginationPx,
+                            animationSpec = tween(durationMillis = 250)
+                        )
+                    }
+                }
+                else if (delta > 1f && offsetAnimatable.targetValue != 0f) {
+                    coroutineScope.launch {
+                        offsetAnimatable.animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(durationMillis = 250)
+                        )
+                    }
+                }
+                return Offset.Zero
             }
-            previousScroll = currentScroll
         }
     }
 
@@ -162,7 +183,7 @@ fun MainScreen(
                 }
             ) { innerPadding ->
 
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
                     BackgroundDecoration()
 
                     PullToRefreshBox(
@@ -181,7 +202,7 @@ fun MainScreen(
                             modifier = Modifier
                                 .padding(horizontal = 13.dp)
                                 .fillMaxWidth()
-                                .verticalScroll(scrollState),
+                                .verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             StoryCarousel(
@@ -314,24 +335,18 @@ fun MainScreen(
                                     }
                                 )
                             }
-
-                            Spacer(modifier = Modifier.height(90.dp))
-
                         }
 
                     }
                     if (totalPagesCount > 1) {
-                        AnimatedVisibility(
-                            visible = isPaginationVisible,
-                            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        ) {
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .fillMaxWidth()
                                     .navigationBarsPadding()
+                                    .graphicsLayer {
+                                        translationY = offsetAnimatable.value
+                                    }
                                     .background(Color(0xFF07070F))
                             ) {
                                 Pagination(
@@ -344,7 +359,6 @@ fun MainScreen(
                                     }
                                 )
                             }
-                        }
                     }
 
                 }
