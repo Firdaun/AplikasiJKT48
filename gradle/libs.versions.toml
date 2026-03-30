@@ -3,6 +3,7 @@ agp = "9.1.0"
 coilCompose = "2.7.0"
 converterGson = "3.0.0"
 coreKtx = "1.10.1"
+haze = "1.7.2"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
@@ -23,6 +24,7 @@ androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "medi
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-video = { module = "io.coil-kt:coil-video", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

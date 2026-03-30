@@ -20,11 +20,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -38,20 +38,35 @@ fun Pagination(
     totalPages: Int,
     onPageChange: (Int) -> Unit
 ) {
-    val paginationGroup = listOf("1", "2", "3", "...", totalPages.toString())
+    if (totalPages <= 1) return
+
+    val paginationGroup = remember(currentPage, totalPages) {
+        val group = mutableListOf<String>()
+        if (totalPages <= 5) {
+            for (i in 1..totalPages) group.add(i.toString())
+        } else {
+            if (currentPage <= 3) {
+                for (i in 1..3) group.add(i.toString())
+                group.add("jump-next")
+                group.add(totalPages.toString())
+            } else if (currentPage >= totalPages -2) {
+                group.add("1")
+                group.add("jump-prev")
+                for (i in totalPages - 2..totalPages) group.add(i.toString())
+            } else {
+                group.add("1")
+                group.add("jump-prev")
+                group.add(currentPage.toString())
+                group.add("jump-next")
+                group.add(totalPages.toString())
+            }
+        }
+        group
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-
-            .drawBehind {
-                drawLine(
-                    color = Color.White.copy(alpha = 0.05f),
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, 0f),
-                    strokeWidth = 1.dp.toPx()
-                )
-            }
             .padding(vertical = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
@@ -83,7 +98,11 @@ fun Pagination(
 
         paginationGroup.forEach { item ->
             val isSelected = item == currentPage.toString()
-            val isEllipsis = item == "..."
+            val isJumpPrev = item == "jump-prev"
+            val isJumpNext = item == "jump-next"
+            val isEllipsis = isJumpPrev || isJumpNext
+
+            val displayText = if (isEllipsis) "..." else item
 
             Box(
                 modifier = Modifier
@@ -120,13 +139,17 @@ fun Pagination(
                         color = if (isSelected) Color.Transparent else Color.White.copy(0.1f),
                         shape = CircleShape
                     )
-                    .clickable(enabled = !isEllipsis) {
-                        if (!isEllipsis) onPageChange(item.toInt())
+                    .clickable{
+                        when {
+                            isJumpPrev -> onPageChange((currentPage - 3).coerceAtLeast(1))
+                            isJumpNext -> onPageChange((currentPage + 3).coerceAtMost(totalPages))
+                            else -> onPageChange(item.toInt())
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = item,
+                    text = displayText,
                     color = if (isSelected) Color.White else Color.White.copy(alpha = 0.5f),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold

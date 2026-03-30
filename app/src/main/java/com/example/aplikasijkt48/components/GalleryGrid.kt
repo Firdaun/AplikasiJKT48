@@ -1,6 +1,6 @@
 package com.example.aplikasijkt48.components
 
-import androidx.compose.foundation.Image
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +36,7 @@ import coil.decode.VideoFrameDecoder
 import coil.request.ImageRequest
 import coil.request.videoFrameMillis
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun GalleryGrid(
     viewMode: String,
@@ -100,8 +100,7 @@ fun GalleryGrid(
         return
     }
 
-    // --- KONDISI 3: MODE ALBUM (Default) ---
-    val albumColumns = if (isTablet) 4 else 2 // Tablet 4 kolom, HP 2 kolom
+    val albumColumns = if (isTablet) 4 else 2
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -127,7 +126,6 @@ fun GalleryGrid(
     }
 }
 
-// Komponen Card khusus untuk Mode Grid (Kotak 1:1)
 @Composable
 fun GridSquareItem(
     item: GalleryItem,

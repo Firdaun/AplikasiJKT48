@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -290,21 +291,29 @@ fun MainScreen(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(50.dp))
 
-                            if (totalPagesCount > 1) {
-                                Pagination(
-                                    currentPage = currentPage,
-                                    totalPages = totalPagesCount,
-                                    onPageChange = { halamanBaru ->
-                                        fetchGalleryData(targetPage = halamanBaru)
-
-                                        currentPage = halamanBaru
-                                    }
-                                )
-                            }
                         }
 
+                    }
+                    if (totalPagesCount > 1) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .navigationBarsPadding()
+                                .background(Color.Transparent)
+                        ) {
+                            Pagination(
+                                currentPage = currentPage,
+                                totalPages = totalPagesCount,
+                                onPageChange = { halamanBaru ->
+                                    fetchGalleryData(targetPage = halamanBaru)
+
+                                    currentPage = halamanBaru
+                                }
+                            )
+                        }
                     }
 
                 }
