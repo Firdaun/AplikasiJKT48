@@ -62,7 +62,6 @@ import com.example.aplikasijkt48.navbar.TopNavbar
 import com.example.aplikasijkt48.network.ApiConfig
 import com.example.aplikasijkt48.network.GalleryViewModel
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -157,13 +156,6 @@ fun MainScreen(
         fetchGalleryData()
     }
 
-    LaunchedEffect(searchQuery) {
-        if (searchQuery.isNotEmpty()) {
-            delay(300)
-            fetchGalleryData()
-        }
-    }
-
     LaunchedEffect(viewModel.isLoading) {
         if (!viewModel.isLoading) {
             isRefreshing = false
@@ -241,8 +233,16 @@ fun MainScreen(
                                 searchQuery = searchQuery,
                                 onSearchChange = {
                                     searchQuery = it
-                                    activeMemberName = it.lowercase().trim()
-                                    currentPage = 1
+                                },
+                                onSearchExecute = { kataKunci ->
+                                    if (kataKunci.isNotBlank()) {
+                                        activeMemberName = kataKunci.lowercase().trim()
+                                        fetchGalleryData(
+                                            targetNickname = activeMemberName,
+                                            targetPage = 1
+                                        )
+                                        currentPage = 1
+                                    }
                                 },
                                 onClear = {
                                     fetchGalleryData(

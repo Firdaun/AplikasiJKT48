@@ -1,5 +1,6 @@
 package com.example.aplikasijkt48.components
 
+import android.annotation.SuppressLint
 import android.graphics.BlurMaskFilter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Close
@@ -43,12 +46,15 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun FloatingControlBar(
     viewMode: String = "album",
@@ -57,6 +63,7 @@ fun FloatingControlBar(
     onPlatformChange: (String) -> Unit = {},
     searchQuery: String = "",
     onSearchChange: (String) -> Unit = {},
+    onSearchExecute: (String) -> Unit = {},
     onClear: () -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
@@ -80,7 +87,7 @@ fun FloatingControlBar(
             ) {
                 ToggleGroup(viewMode, onViewModeChange, isTablet, Modifier.width(280.dp))
                 PlatformGroup(activePlatform, onPlatformChange, isTablet)
-                SearchBar(searchQuery, onSearchChange, onClear, isTablet, Modifier.width(280.dp))
+                SearchBar(searchQuery, onSearchChange, onSearchExecute, onClear, isTablet, Modifier.width(280.dp))
             }
         } else {
             Column(
@@ -92,7 +99,7 @@ fun FloatingControlBar(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     ToggleGroup(viewMode, onViewModeChange, isTablet, Modifier.weight(1f))
-                    SearchBar(searchQuery, onSearchChange, onClear, isTablet, Modifier.weight(1f))
+                    SearchBar(searchQuery, onSearchChange, onSearchExecute, onClear, isTablet, Modifier.weight(1f))
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -325,13 +332,14 @@ fun PlatformGroup(activePlatform: String, onPlatformChange: (String) -> Unit, is
 fun SearchBar(
     searchQuery: String,
     onSearchChange: (String) -> Unit,
+    onSearchExecute: (String) -> Unit,
     onClear: () -> Unit,
     isTablet: Boolean,
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val fontSize = if (isTablet) 12.sp else 10.sp
-
+    val keyboardController = LocalSoftwareKeyboardController.current
     Row(
         modifier = modifier
             .height(40.dp)
@@ -376,6 +384,13 @@ fun SearchBar(
         BasicTextField(
             value = searchQuery,
             onValueChange = onSearchChange,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(
+                onSend = {
+                    onSearchExecute(searchQuery)
+                    keyboardController?.hide()
+                }
+            ),
             textStyle = TextStyle(
                 color = Color.White,
                 fontSize = fontSize,
