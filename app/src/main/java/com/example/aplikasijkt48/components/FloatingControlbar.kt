@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -85,9 +86,9 @@ fun FloatingControlBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ToggleGroup(viewMode, onViewModeChange, isTablet, Modifier.width(280.dp))
-                PlatformGroup(activePlatform, onPlatformChange, isTablet)
-                SearchBar(searchQuery, onSearchChange, onSearchExecute, onClear, isTablet, Modifier.width(280.dp))
+                ToggleGroup(viewMode, onViewModeChange, true, Modifier.width(280.dp))
+                PlatformGroup(activePlatform, onPlatformChange, true)
+                SearchBar(searchQuery, onSearchChange, onSearchExecute, onClear, true, Modifier.width(280.dp))
             }
         } else {
             Column(
@@ -98,14 +99,14 @@ fun FloatingControlBar(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    ToggleGroup(viewMode, onViewModeChange, isTablet, Modifier.weight(1f))
-                    SearchBar(searchQuery, onSearchChange, onSearchExecute, onClear, isTablet, Modifier.weight(1f))
+                    ToggleGroup(viewMode, onViewModeChange, false, Modifier.weight(1f))
+                    SearchBar(searchQuery, onSearchChange, onSearchExecute, onClear, false, Modifier.weight(1f))
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    PlatformGroup(activePlatform, onPlatformChange, isTablet)
+                    PlatformGroup(activePlatform, onPlatformChange, false)
                 }
             }
         }
@@ -340,6 +341,7 @@ fun SearchBar(
     var isFocused by remember { mutableStateOf(false) }
     val fontSize = if (isTablet) 12.sp else 10.sp
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     Row(
         modifier = modifier
             .height(40.dp)
@@ -389,6 +391,7 @@ fun SearchBar(
                 onSearch = {
                     onSearchExecute(searchQuery)
                     keyboardController?.hide()
+                    focusManager.clearFocus()
                 }
             ),
             textStyle = TextStyle(
