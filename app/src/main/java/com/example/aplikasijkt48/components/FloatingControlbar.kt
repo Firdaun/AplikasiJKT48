@@ -384,9 +384,9 @@ fun SearchBar(
         BasicTextField(
             value = searchQuery,
             onValueChange = onSearchChange,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
-                onSend = {
+                onSearch = {
                     onSearchExecute(searchQuery)
                     keyboardController?.hide()
                 }
