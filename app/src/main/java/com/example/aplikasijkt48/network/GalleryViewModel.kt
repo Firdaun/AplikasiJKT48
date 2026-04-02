@@ -2,6 +2,7 @@ package com.example.aplikasijkt48.network
 
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -13,11 +14,14 @@ data class CacheEntry(
     val pagingInfo: PagingInfo?,
     val timestamp: Long
 )
+
 class GalleryViewModel : ViewModel() {
     var fotoList by mutableStateOf<List<PhotoItem>>(emptyList())
     var pagingInfo by mutableStateOf<PagingInfo?>(null)
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
+    var globalAlbumCount by mutableIntStateOf(0)
+        private set
 
     private val cacheMap = mutableMapOf<String, CacheEntry>()
     private val cacheDuration = 15 * 60 * 1000L
@@ -32,12 +36,16 @@ class GalleryViewModel : ViewModel() {
         postUrl: String? = null,
         forceRefresh: Boolean = false
     ) {
-        val cacheKey = "page=$page|size=$size|src=$source|nick=$nickname|mode=$mode|search=$search|url=$postUrl"
+        val cacheKey =
+            "page=$page|size=$size|src=$source|nick=$nickname|mode=$mode|search=$search|url=$postUrl"
         val currentTime = System.currentTimeMillis()
 
         val existingCache = cacheMap[cacheKey]
         if (!forceRefresh && existingCache != null && (currentTime - existingCache.timestamp < cacheDuration)) {
-            Log.d("API_CACHE", "Halaman/Filter ini sudah ada di RAM! Langsung tampilin tanpa nembak API. ($cacheKey)")
+            Log.d(
+                "API_CACHE",
+                "Halaman/Filter ini sudah ada di RAM! Langsung tampilin tanpa nembak API. ($cacheKey)"
+            )
 
             fotoList = existingCache.fotoList
             pagingInfo = existingCache.pagingInfo
@@ -85,4 +93,33 @@ class GalleryViewModel : ViewModel() {
             }
         }
     }
+
+    fun fetchMemberGlobalAlbumCount(nickname: String?) {
+        if (nickname.isNullOrEmpty()) {
+            globalAlbumCount = 0
+            return
+        }
+        viewModelScope.launch {
+            try {
+                val response = ApiClient.instance.getPublicPhotos(
+                    page = 1,
+                    size = 1,
+                    source = null,
+                    nickname = nickname,
+                    mode = "album",
+                    search = null,
+                    postUrl = null
+                )
+                globalAlbumCount = response.paging?.totalItem ?: 0
+                Log.d(
+                    "API_INTEL",
+                    "Intel berhasil mencatat $nickname punya $globalAlbumCount album"
+                )
+            } catch (e: Exception) {
+                globalAlbumCount = 0
+                Log.e("API_INTEL", "Intel gagal: ${e.message}")
+            }
+        }
+    }
 }
+

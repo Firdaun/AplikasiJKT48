@@ -1,5 +1,6 @@
 package com.example.aplikasijkt48.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun SearchResultsInfo(
     nickname: String,
@@ -33,20 +35,18 @@ fun SearchResultsInfo(
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp > 768
 
-    // Ukuran teks responsif
     val titleSize = if (isTablet) 13.sp else 11.5.sp
     val badgeSize = if (isTablet) 11.sp else 10.sp
     val buttonSize = if (isTablet) 13.sp else 10.sp
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp) // gap-1
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             val prefix = if (nickname.isNotEmpty()) "$nickname's" else "All"
             val suffix = if (viewMode == "photo") "photos" else "albums"
@@ -73,7 +73,7 @@ fun SearchResultsInfo(
         }
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp), // gap-2
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Tombol 2: Show Member Photos (Hanya muncul jika kondisi terpenuhi)

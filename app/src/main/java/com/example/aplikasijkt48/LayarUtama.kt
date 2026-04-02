@@ -131,7 +131,6 @@ fun MainScreen(
 
     val totalItemsCount = viewModel.pagingInfo?.totalItem ?: 0
     val totalPagesCount = viewModel.pagingInfo?.totalPage ?: 1
-    val globalAlbumCount = 5
 
     fun fetchGalleryData(
         targetPage: Int = currentPage,
@@ -150,6 +149,7 @@ fun MainScreen(
             postUrl = targetUrl,
             forceRefresh = isRefresh
         )
+        viewModel.fetchMemberGlobalAlbumCount(targetNickname)
     }
 
     LaunchedEffect(Unit) {
@@ -262,7 +262,7 @@ fun MainScreen(
                                 viewMode = viewMode,
                                 totalItem = totalItemsCount,
                                 postUrl = postUrl,
-                                globalAlbumCount = globalAlbumCount,
+                                globalAlbumCount = viewModel.globalAlbumCount,
                                 onShowAllClick = {
                                     fetchGalleryData(
                                         targetNickname = "",

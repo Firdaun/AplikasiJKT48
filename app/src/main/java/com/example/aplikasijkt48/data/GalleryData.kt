@@ -15,8 +15,6 @@ object GalleryData {
 
         // === TIM DREAM ===
         MemberProfile(imageResId = R.drawable.kabesha_adeline_wijaya,       name = "delynn",    team = "dream"),
-        MemberProfile(imageResId = R.drawable.kabesha_amanda_sukma,         name = "amanda",    team = "dream"),
-        MemberProfile(imageResId = R.drawable.kabesha_chelsea_davina,       name = "chelsea",   team = "dream"),
         MemberProfile(imageResId = R.drawable.kabesha_febriola_sinambela,   name = "olla",      team = "dream"),
         MemberProfile(imageResId = R.drawable.kabesha_freya_jayawardana,    name = "freya",     team = "dream"),
         MemberProfile(imageResId = R.drawable.kabesha_gabriela_abigail,     name = "ella",      team = "dream"),

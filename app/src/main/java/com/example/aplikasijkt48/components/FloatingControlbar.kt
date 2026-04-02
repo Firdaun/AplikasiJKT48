@@ -362,13 +362,13 @@ fun SearchBar(
                         frameworkPaint.strokeWidth = 10f
                         frameworkPaint.style = android.graphics.Paint.Style.STROKE
                         canvas.drawRoundRect(
-                            0f,
-                            0f,
-                            size.width,
-                            size.height,
-                            50.dp.toPx(),
-                            50.dp.toPx(),
-                            paint
+                            left = 0f,
+                            top = 0f,
+                            right = size.width,
+                            bottom = size.height,
+                            radiusX = 50.dp.toPx(),
+                            radiusY = 50.dp.toPx(),
+                            paint = paint
                         )
                     }
                 }
