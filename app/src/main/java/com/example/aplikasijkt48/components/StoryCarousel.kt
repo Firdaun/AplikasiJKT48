@@ -1,5 +1,6 @@
 package com.example.aplikasijkt48.components
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.BlurMaskFilter
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -75,11 +76,14 @@ val teamStyles = mapOf(
     "trainee" to TeamStyle(Color(0xFF94A3B8), Color(0xFFCBD5E1))
 )
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun StoryCarousel(
     activeMember: String,
+    lastUpdate: String,
+    isLoading: Boolean = false,
     onSelectMember: (String) -> Unit,
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
 ) {
     val totalData = GalleryData.photoProfile.size
     val startIndex = (Int.MAX_VALUE / 2) - ((Int.MAX_VALUE / 2) % totalData)
@@ -117,7 +121,7 @@ fun StoryCarousel(
         ) {
             Column {
                 Text(
-                    text = "Updated Nov 10, 2026",
+                    text = if (isLoading) "Updating..." else "Updated $lastUpdate",
                     color = Color(0xFF00D4FF),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,

@@ -63,6 +63,9 @@ import com.example.aplikasijkt48.network.ApiConfig
 import com.example.aplikasijkt48.network.GalleryViewModel
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,6 +135,27 @@ fun MainScreen(
     val totalItemsCount = viewModel.pagingInfo?.totalItem ?: 0
     val totalPagesCount = viewModel.pagingInfo?.totalPage ?: 1
 
+    val lastUpdateText = remember(viewModel.fotoList) {
+        val newData = viewModel.fotoList.firstOrNull()
+        if (newData != null){
+            try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+                inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+                val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
+                outputFormat.timeZone = TimeZone.getDefault()
+
+                val cleanDateString = newData.savedAt.substringBefore(".").substringBefore("Z")
+                val parsedDate = inputFormat.parse(cleanDateString)
+                outputFormat.format(parsedDate!!)
+            } catch (_: Exception){
+                newData.savedAt.take(10)
+            }
+        } else {
+            "Not Found"
+        }
+    }
+
     fun fetchGalleryData(
         targetPage: Int = currentPage,
         targetMode: String = viewMode,
@@ -199,6 +223,8 @@ fun MainScreen(
                         ) {
                             StoryCarousel(
                                 modifier = Modifier.padding(top = 20.dp),
+                                lastUpdate = lastUpdateText,
+                                isLoading = viewModel.isLoading,
                                 activeMember = activeMemberName,
                                 onSelectMember = { memberName ->
                                     fetchGalleryData(
