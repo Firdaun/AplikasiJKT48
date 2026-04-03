@@ -97,8 +97,7 @@ fun MainScreen(
                             animationSpec = tween(durationMillis = 250)
                         )
                     }
-                }
-                else if (delta > 1f && offsetAnimatable.targetValue != 0f) {
+                } else if (delta > 1f && offsetAnimatable.targetValue != 0f) {
                     coroutineScope.launch {
                         offsetAnimatable.animateTo(
                             targetValue = 0f,
@@ -121,12 +120,17 @@ fun MainScreen(
     )
 
     val galleryItems = viewModel.fotoList.map { apiData ->
-        val rawDate = apiData.postedAt.take(10)
-        val parts = rawDate.split("-")
-        val finalDate = if (parts.size == 3) {
-            "${parts[2]}/${parts[1]}/${parts[0]}"
-        } else {
-            rawDate
+        val finalDate = try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+            inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            val outputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+            outputFormat.timeZone = TimeZone.getDefault()
+
+            val parsedDate = inputFormat.parse(apiData.postedAt)
+            outputFormat.format(parsedDate!!)
+        } catch (_: Exception) {
+            apiData.postedAt.take(10)
         }
         GalleryItem(
             platform = apiData.source,
@@ -144,7 +148,7 @@ fun MainScreen(
 
     val lastUpdateText = remember(viewModel.fotoList) {
         val newData = viewModel.fotoList.firstOrNull()
-        if (newData != null){
+        if (newData != null) {
             try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
                 inputFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -152,10 +156,9 @@ fun MainScreen(
                 val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
                 outputFormat.timeZone = TimeZone.getDefault()
 
-                val cleanDateString = newData.savedAt.substringBefore(".").substringBefore("Z")
-                val parsedDate = inputFormat.parse(cleanDateString)
+                val parsedDate = inputFormat.parse(newData.savedAt)
                 outputFormat.format(parsedDate!!)
-            } catch (_: Exception){
+            } catch (_: Exception) {
                 newData.savedAt.take(10)
             }
         } else {
@@ -206,7 +209,11 @@ fun MainScreen(
                 }
             ) { innerPadding ->
 
-                Box(modifier = Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .nestedScroll(nestedScrollConnection)
+                ) {
                     BackgroundDecoration()
 
                     PullToRefreshBox(
@@ -372,26 +379,26 @@ fun MainScreen(
 
                     }
                     if (totalPagesCount > 1) {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .fillMaxWidth()
-                                    .navigationBarsPadding()
-                                    .graphicsLayer {
-                                        translationY = offsetAnimatable.value
-                                    }
-                                    .background(Color(0xFF07070F))
-                            ) {
-                                Pagination(
-                                    currentPage = currentPage,
-                                    totalPages = totalPagesCount,
-                                    onPageChange = { halamanBaru ->
-                                        fetchGalleryData(targetPage = halamanBaru)
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .navigationBarsPadding()
+                                .graphicsLayer {
+                                    translationY = offsetAnimatable.value
+                                }
+                                .background(Color(0xFF07070F))
+                        ) {
+                            Pagination(
+                                currentPage = currentPage,
+                                totalPages = totalPagesCount,
+                                onPageChange = { halamanBaru ->
+                                    fetchGalleryData(targetPage = halamanBaru)
 
-                                        currentPage = halamanBaru
-                                    }
-                                )
-                            }
+                                    currentPage = halamanBaru
+                                }
+                            )
+                        }
                     }
 
                 }
