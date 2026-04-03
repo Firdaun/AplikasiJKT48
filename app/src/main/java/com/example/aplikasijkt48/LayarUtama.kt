@@ -121,12 +121,19 @@ fun MainScreen(
     )
 
     val galleryItems = viewModel.fotoList.map { apiData ->
+        val rawDate = apiData.postedAt.take(10)
+        val parts = rawDate.split("-")
+        val finalDate = if (parts.size == 3) {
+            "${parts[2]}/${parts[1]}/${parts[0]}"
+        } else {
+            rawDate
+        }
         GalleryItem(
             platform = apiData.source,
             isVideo = apiData.mediaType == "VIDEO" || apiData.srcUrl.endsWith(".mp4"),
             imageUrl = "${ApiConfig.BASE_URL}${apiData.srcUrl}",
             caption = apiData.caption ?: "Tanpa Caption",
-            date = apiData.postedAt.take(10),
+            date = finalDate,
             member = apiData.member?.nickname ?: "JKT48",
             postUrl = apiData.postUrl ?: ""
         )

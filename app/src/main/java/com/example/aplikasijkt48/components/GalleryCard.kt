@@ -1,5 +1,6 @@
 package com.example.aplikasijkt48.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,6 +42,7 @@ data class GalleryItem(
     val postUrl: String
 )
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun GalleryCard(
     item: GalleryItem,
