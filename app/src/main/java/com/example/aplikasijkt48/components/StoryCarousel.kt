@@ -66,6 +66,8 @@ import androidx.compose.ui.unit.sp
 import com.example.aplikasijkt48.MainScreen
 import com.example.aplikasijkt48.data.GalleryData
 import com.example.aplikasijkt48.ui.theme.AplikasiJKT48Theme
+import java.text.NumberFormat
+import java.util.Locale
 
 data class TeamStyle(val color: Color, val gradientEnd: Color)
 
@@ -82,9 +84,11 @@ fun StoryCarousel(
     activeMember: String,
     lastUpdate: String,
     isLoading: Boolean = false,
+    totalMedia: Int,
     onSelectMember: (String) -> Unit,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
 ) {
+    val formattedTotalMedia = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).format(totalMedia)
     val totalData = GalleryData.photoProfile.size
     val startIndex = (Int.MAX_VALUE / 2) - ((Int.MAX_VALUE / 2) % totalData)
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = startIndex)
@@ -171,7 +175,7 @@ fun StoryCarousel(
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "10,245",
+                        text = if (totalMedia > 0) formattedTotalMedia else "...",
                         color = Color(0xFF00D4FF),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -196,7 +200,7 @@ fun StoryCarousel(
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "40",
+                        text = totalData.toString(),
                         color = Color(0xFFA855F7),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,

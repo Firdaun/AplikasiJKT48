@@ -22,6 +22,8 @@ class GalleryViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
     var globalAlbumCount by mutableIntStateOf(0)
         private set
+    var globalTotalMedia by mutableIntStateOf(0)
+        private set
 
     private val cacheMap = mutableMapOf<String, CacheEntry>()
     private val cacheDuration = 15 * 60 * 1000L
@@ -118,6 +120,26 @@ class GalleryViewModel : ViewModel() {
             } catch (e: Exception) {
                 globalAlbumCount = 0
                 Log.e("API_INTEL", "Intel gagal: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchGlobalTotalMedia() {
+        viewModelScope.launch {
+            try {
+                val response = ApiClient.instance.getPublicPhotos(
+                    page = 1,
+                    size = 1,
+                    source = null,
+                    nickname = null,
+                    mode = null,
+                    search = null,
+                    postUrl = null
+                )
+                globalTotalMedia = response.paging?.totalItem ?: 0
+            } catch (e: Exception) {
+                globalTotalMedia = 0
+                Log.e("API_INTEL", "Gagal mengambil global total media: ${e.message}")
             }
         }
     }

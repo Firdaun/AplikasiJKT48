@@ -188,6 +188,7 @@ fun MainScreen(
 
     LaunchedEffect(Unit) {
         fetchGalleryData()
+        viewModel.fetchGlobalTotalMedia()
     }
 
     LaunchedEffect(viewModel.isLoading) {
@@ -239,6 +240,7 @@ fun MainScreen(
                                 modifier = Modifier.padding(top = 20.dp),
                                 lastUpdate = lastUpdateText,
                                 isLoading = viewModel.isLoading,
+                                totalMedia = viewModel.globalTotalMedia,
                                 activeMember = activeMemberName,
                                 onSelectMember = { memberName ->
                                     fetchGalleryData(
