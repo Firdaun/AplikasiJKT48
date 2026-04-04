@@ -83,7 +83,6 @@ val teamStyles = mapOf(
 fun StoryCarousel(
     activeMember: String,
     lastUpdate: String,
-    isLoading: Boolean = false,
     totalMedia: Int,
     onSelectMember: (String) -> Unit,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
@@ -125,7 +124,7 @@ fun StoryCarousel(
         ) {
             Column {
                 Text(
-                    text = if (isLoading) "Updating..." else "Updated $lastUpdate",
+                    text = "Updated $lastUpdate",
                     color = Color(0xFF00D4FF),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,

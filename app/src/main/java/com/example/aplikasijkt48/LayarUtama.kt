@@ -135,7 +135,7 @@ fun MainScreen(
         GalleryItem(
             platform = apiData.source,
             isVideo = apiData.mediaType == "VIDEO" || apiData.srcUrl.endsWith(".mp4"),
-            imageUrl = "${ApiConfig.BASE_URL}${apiData.srcUrl}",
+            imageUrl = if (apiData.srcUrl.startsWith("http")) apiData.srcUrl else "${ApiConfig.BASE_URL}${apiData.srcUrl}",
             caption = apiData.caption ?: "Tanpa Caption",
             date = finalDate,
             member = apiData.member?.nickname ?: "JKT48",
@@ -146,9 +146,9 @@ fun MainScreen(
     val totalItemsCount = viewModel.pagingInfo?.totalItem ?: 0
     val totalPagesCount = viewModel.pagingInfo?.totalPage ?: 1
 
-    val lastUpdateText = remember(viewModel.fotoList) {
-        val newData = viewModel.fotoList.firstOrNull()
-        if (newData != null) {
+    val lastUpdateText = remember(viewModel.globalLastUpdateRaw) {
+        val rawDate = viewModel.globalLastUpdateRaw
+        if (rawDate != null) {
             try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
                 inputFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -156,13 +156,13 @@ fun MainScreen(
                 val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
                 outputFormat.timeZone = TimeZone.getDefault()
 
-                val parsedDate = inputFormat.parse(newData.savedAt)
+                val parsedDate = inputFormat.parse(rawDate)
                 outputFormat.format(parsedDate!!)
             } catch (_: Exception) {
-                newData.savedAt.take(10)
+                rawDate.take(10)
             }
         } else {
-            "Not Found"
+            "..."
         }
     }
 
@@ -239,7 +239,6 @@ fun MainScreen(
                             StoryCarousel(
                                 modifier = Modifier.padding(top = 20.dp),
                                 lastUpdate = lastUpdateText,
-                                isLoading = viewModel.isLoading,
                                 totalMedia = viewModel.globalTotalMedia,
                                 activeMember = activeMemberName,
                                 onSelectMember = { memberName ->

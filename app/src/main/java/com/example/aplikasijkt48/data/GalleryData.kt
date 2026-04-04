@@ -9,7 +9,7 @@ data class MemberProfile(
 )
 
 object GalleryData {
-    private val teamOrder = mapOf("passion" to 1, "dream" to 2, "love" to 3, "trainee" to 4)
+    private val teamOrder = mapOf("dream" to 1, "passion" to 2, "love" to 3, "trainee" to 4)
 
     val photoProfile = listOf(
 

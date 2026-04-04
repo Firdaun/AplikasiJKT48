@@ -24,6 +24,8 @@ class GalleryViewModel : ViewModel() {
         private set
     var globalTotalMedia by mutableIntStateOf(0)
         private set
+    var globalLastUpdateRaw by mutableStateOf<String?>(null)
+        private set
 
     private val cacheMap = mutableMapOf<String, CacheEntry>()
     private val cacheDuration = 15 * 60 * 1000L
@@ -137,6 +139,7 @@ class GalleryViewModel : ViewModel() {
                     postUrl = null
                 )
                 globalTotalMedia = response.paging?.totalItem ?: 0
+                globalLastUpdateRaw = response.data.firstOrNull()?.savedAt
             } catch (e: Exception) {
                 globalTotalMedia = 0
                 Log.e("API_INTEL", "Gagal mengambil global total media: ${e.message}")
