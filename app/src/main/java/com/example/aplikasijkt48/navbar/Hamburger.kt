@@ -24,8 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Hamburger() {
-    var isOpen by remember { mutableStateOf(false) }
+fun Hamburger(isOpen : Boolean, onToggle: () -> Unit) {
     val topRound by animateFloatAsState(targetValue = if (isOpen) 45f else 0f)
     val bottomRound by animateFloatAsState(targetValue = if (isOpen) -45f else 0f)
 
@@ -39,7 +38,7 @@ fun Hamburger() {
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = { isOpen = !isOpen  }
+                onClick = onToggle
 
 ),
         verticalArrangement = Arrangement.spacedBy(6.dp),

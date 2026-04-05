@@ -23,7 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TopNavbar() {
+fun TopNavbar(
+    isDrawerOpen: Boolean,
+    onToggleDrawer: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -98,7 +101,7 @@ fun TopNavbar() {
                     )
                 }
             }
-            Hamburger()
+            Hamburger(isOpen = isDrawerOpen, onToggle = onToggleDrawer)
         }
         HorizontalDivider(
             thickness = 1.dp,

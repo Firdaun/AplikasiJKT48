@@ -23,11 +23,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,6 +60,7 @@ import com.example.aplikasijkt48.components.GalleryItem
 import com.example.aplikasijkt48.components.Lightbox
 import com.example.aplikasijkt48.components.Pagination
 import com.example.aplikasijkt48.components.SearchResultsInfo
+import com.example.aplikasijkt48.components.SidebarMenu
 import com.example.aplikasijkt48.components.StoryCarousel
 import com.example.aplikasijkt48.navbar.TopNavbar
 import com.example.aplikasijkt48.network.ApiConfig
@@ -78,6 +82,9 @@ fun MainScreen(
     var searchQuery by remember { mutableStateOf("") }
     var currentPage by remember { mutableIntStateOf(1) }
     var postUrl by remember { mutableStateOf("") }
+
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val isDrawOpen = drawerState.targetValue == DrawerValue.Open
 
     val coroutineScope = rememberCoroutineScope()
     val tinggiPagination = 120.dp
@@ -196,231 +203,249 @@ fun MainScreen(
             isRefreshing = false
         }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .blur(radius = backgroundBlur)
-        ) {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = Color(0xFF07070F),
-                topBar = {
-                    TopNavbar()
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            SidebarMenu (
+                onClose = {
+                    coroutineScope.launch { drawerState.close() }
                 }
-            ) { innerPadding ->
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .nestedScroll(nestedScrollConnection)
-                ) {
-                    BackgroundDecoration()
-
-                    PullToRefreshBox(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize(),
-                        state = pullRefreshState,
-                        isRefreshing = isRefreshing,
-                        onRefresh = {
-                            isRefreshing = true
-
-                            fetchGalleryData(isRefresh = true)
-                        }
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(horizontal = 13.dp)
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            StoryCarousel(
-                                modifier = Modifier.padding(top = 20.dp),
-                                lastUpdate = lastUpdateText,
-                                totalMedia = viewModel.globalTotalMedia,
-                                activeMember = activeMemberName,
-                                onSelectMember = { memberName ->
-                                    fetchGalleryData(
-                                        targetNickname = memberName,
-                                        targetPage = 1
-                                    )
-                                    activeMemberName = memberName
-                                    searchQuery = ""
-                                    currentPage = 1
+            )
+        }
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blur(radius = backgroundBlur)
+            ) {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = Color(0xFF07070F),
+                    topBar = {
+                        TopNavbar(
+                            isDrawerOpen = isDrawOpen,
+                            onToggleDrawer = {
+                                coroutineScope.launch {
+                                    if (drawerState.isOpen) drawerState.close() else drawerState.open()
                                 }
-                            )
+                            }
+                        )
+                    }
+                ) { innerPadding ->
 
-                            Spacer(modifier = Modifier.height(5.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .nestedScroll(nestedScrollConnection)
+                    ) {
+                        BackgroundDecoration()
 
-                            FloatingControlBar(
-                                viewMode = viewMode,
-                                onViewModeChange = {
-                                    fetchGalleryData(
-                                        targetPage = 1,
-                                        targetMode = it,
-                                        targetUrl = ""
-                                    )
-                                    viewMode = it
-                                    currentPage = 1
-                                },
-                                activePlatform = activePlatform,
-                                onPlatformChange = {
-                                    fetchGalleryData(targetPlatform = it, targetPage = 1)
-                                    activePlatform = it
-                                    currentPage = 1
-                                },
-                                searchQuery = searchQuery,
-                                onSearchChange = {
-                                    searchQuery = it
-                                },
-                                onSearchExecute = { kataKunci ->
-                                    if (kataKunci.isNotBlank()) {
-                                        activeMemberName = kataKunci.lowercase().trim()
+                        PullToRefreshBox(
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .fillMaxSize(),
+                            state = pullRefreshState,
+                            isRefreshing = isRefreshing,
+                            onRefresh = {
+                                isRefreshing = true
+
+                                fetchGalleryData(isRefresh = true)
+                            }
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(horizontal = 13.dp)
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState()),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                StoryCarousel(
+                                    modifier = Modifier.padding(top = 20.dp),
+                                    lastUpdate = lastUpdateText,
+                                    totalMedia = viewModel.globalTotalMedia,
+                                    activeMember = activeMemberName,
+                                    onSelectMember = { memberName ->
                                         fetchGalleryData(
-                                            targetNickname = activeMemberName,
+                                            targetNickname = memberName,
                                             targetPage = 1
                                         )
+                                        activeMemberName = memberName
+                                        searchQuery = ""
                                         currentPage = 1
                                     }
-                                },
-                                onClear = {
-                                    fetchGalleryData(
-                                        targetNickname = "",
-                                        targetPage = 1
-                                    )
-                                    searchQuery = ""
-                                    activeMemberName = ""
-                                    currentPage = 1
-                                }
-                            )
+                                )
 
-                            Spacer(modifier = Modifier.height(13.dp))
+                                Spacer(modifier = Modifier.height(5.dp))
 
-                            SearchResultsInfo(
-                                nickname = activeMemberName,
-                                viewMode = viewMode,
-                                totalItem = totalItemsCount,
-                                postUrl = postUrl,
-                                globalAlbumCount = viewModel.globalAlbumCount,
-                                onShowAllClick = {
-                                    fetchGalleryData(
-                                        targetNickname = "",
-                                        targetUrl = "",
-                                        targetPage = 1
-                                    )
-                                    activeMemberName = ""
-                                    searchQuery = ""
-                                    postUrl = ""
-                                    currentPage = 1
-                                },
-                                onShowMemberPhotosClick = {
-                                    fetchGalleryData(
-                                        targetPage = 1,
-                                        targetMode = "photo",
-                                        targetUrl = ""
-                                    )
-                                    viewMode = "photo"
-                                    postUrl = ""
-                                    currentPage = 1
-                                }
-                            )
-
-                            Spacer(modifier = Modifier.height(13.dp))
-
-                            if (viewModel.isLoading && viewModel.fotoList.isEmpty()) {
-                                Box(
-                                    modifier = Modifier.height(200.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(color = Color(0xFFEE1D52))
-                                }
-                            } else if (viewModel.errorMessage != null) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .height(200.dp), contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Error: ${viewModel.errorMessage}",
-                                        color = Color.Red
-                                    )
-                                }
-                            } else {
-                                GalleryGrid(
+                                FloatingControlBar(
                                     viewMode = viewMode,
-                                    items = galleryItems,
-                                    onItemClick = { onClick ->
-                                        if (viewMode == "album") {
-                                            val indexData = galleryItems.indexOf(onClick)
-                                            if (indexData != -1) {
-                                                val targetPostUrl =
-                                                    viewModel.fotoList[indexData].postUrl ?: ""
-                                                val targetNickname = onClick.member.lowercase()
-                                                fetchGalleryData(
-                                                    targetPage = 1,
-                                                    targetMode = "photo",
-                                                    targetNickname = targetNickname,
-                                                    targetUrl = targetPostUrl
-                                                )
-
-                                                postUrl = targetPostUrl
-                                                viewMode = "photo"
-                                                currentPage = 1
-                                                activeMemberName = onClick.member.lowercase()
-                                            }
-                                        } else {
-                                            lightboxItem = onClick
+                                    onViewModeChange = {
+                                        fetchGalleryData(
+                                            targetPage = 1,
+                                            targetMode = it,
+                                            targetUrl = ""
+                                        )
+                                        viewMode = it
+                                        currentPage = 1
+                                    },
+                                    activePlatform = activePlatform,
+                                    onPlatformChange = {
+                                        fetchGalleryData(targetPlatform = it, targetPage = 1)
+                                        activePlatform = it
+                                        currentPage = 1
+                                    },
+                                    searchQuery = searchQuery,
+                                    onSearchChange = {
+                                        searchQuery = it
+                                    },
+                                    onSearchExecute = { kataKunci ->
+                                        if (kataKunci.isNotBlank()) {
+                                            activeMemberName = kataKunci.lowercase().trim()
+                                            fetchGalleryData(
+                                                targetNickname = activeMemberName,
+                                                targetPage = 1
+                                            )
+                                            currentPage = 1
                                         }
+                                    },
+                                    onClear = {
+                                        fetchGalleryData(
+                                            targetNickname = "",
+                                            targetPage = 1
+                                        )
+                                        searchQuery = ""
+                                        activeMemberName = ""
+                                        currentPage = 1
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.height(13.dp))
+
+                                SearchResultsInfo(
+                                    nickname = activeMemberName,
+                                    viewMode = viewMode,
+                                    totalItem = totalItemsCount,
+                                    postUrl = postUrl,
+                                    globalAlbumCount = viewModel.globalAlbumCount,
+                                    onShowAllClick = {
+                                        fetchGalleryData(
+                                            targetNickname = "",
+                                            targetUrl = "",
+                                            targetPage = 1
+                                        )
+                                        activeMemberName = ""
+                                        searchQuery = ""
+                                        postUrl = ""
+                                        currentPage = 1
+                                    },
+                                    onShowMemberPhotosClick = {
+                                        fetchGalleryData(
+                                            targetPage = 1,
+                                            targetMode = "photo",
+                                            targetUrl = ""
+                                        )
+                                        viewMode = "photo"
+                                        postUrl = ""
+                                        currentPage = 1
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.height(13.dp))
+
+                                if (viewModel.isLoading && viewModel.fotoList.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier.height(200.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(color = Color(0xFFEE1D52))
+                                    }
+                                } else if (viewModel.errorMessage != null) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .height(200.dp), contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Error: ${viewModel.errorMessage}",
+                                            color = Color.Red
+                                        )
+                                    }
+                                } else {
+                                    GalleryGrid(
+                                        viewMode = viewMode,
+                                        items = galleryItems,
+                                        onItemClick = { onClick ->
+                                            if (viewMode == "album") {
+                                                val indexData = galleryItems.indexOf(onClick)
+                                                if (indexData != -1) {
+                                                    val targetPostUrl =
+                                                        viewModel.fotoList[indexData].postUrl ?: ""
+                                                    val targetNickname = onClick.member.lowercase()
+                                                    fetchGalleryData(
+                                                        targetPage = 1,
+                                                        targetMode = "photo",
+                                                        targetNickname = targetNickname,
+                                                        targetUrl = targetPostUrl
+                                                    )
+
+                                                    postUrl = targetPostUrl
+                                                    viewMode = "photo"
+                                                    currentPage = 1
+                                                    activeMemberName = onClick.member.lowercase()
+                                                }
+                                            } else {
+                                                lightboxItem = onClick
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+
+                        }
+                        if (totalPagesCount > 1) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .navigationBarsPadding()
+                                    .graphicsLayer {
+                                        translationY = offsetAnimatable.value
+                                    }
+                                    .background(Color(0xFF07070F))
+                            ) {
+                                Pagination(
+                                    currentPage = currentPage,
+                                    totalPages = totalPagesCount,
+                                    onPageChange = { halamanBaru ->
+                                        fetchGalleryData(targetPage = halamanBaru)
+
+                                        currentPage = halamanBaru
                                     }
                                 )
                             }
                         }
 
                     }
-                    if (totalPagesCount > 1) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .navigationBarsPadding()
-                                .graphicsLayer {
-                                    translationY = offsetAnimatable.value
-                                }
-                                .background(Color(0xFF07070F))
-                        ) {
-                            Pagination(
-                                currentPage = currentPage,
-                                totalPages = totalPagesCount,
-                                onPageChange = { halamanBaru ->
-                                    fetchGalleryData(targetPage = halamanBaru)
-
-                                    currentPage = halamanBaru
-                                }
-                            )
-                        }
-                    }
 
                 }
-
             }
-        }
-        AnimatedVisibility(
-            visible = lightboxItem != null,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            lightboxItem?.let { item ->
-                Lightbox(
-                    item = item,
-                    allItems = galleryItems,
-                    onClose = { lightboxItem = null },
-                    onNavigate = { itemBaru -> lightboxItem = itemBaru }
-                )
+            AnimatedVisibility(
+                visible = lightboxItem != null,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                lightboxItem?.let { item ->
+                    Lightbox(
+                        item = item,
+                        allItems = galleryItems,
+                        onClose = { lightboxItem = null },
+                        onNavigate = { itemBaru -> lightboxItem = itemBaru }
+                    )
+                }
             }
-        }
 
+        }
     }
 }
 
