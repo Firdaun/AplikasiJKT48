@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,7 +32,7 @@ import com.example.aplikasijkt48.R
 @Composable
 fun SidebarMenu(onClose: () -> Unit) {
     ModalDrawerSheet(
-        drawerContainerColor = Color(0xFF0D0D1A),
+        drawerContainerColor = Color(0xFF07070F),
         modifier = Modifier
             .width(300.dp)
             .fillMaxHeight()
@@ -54,13 +56,23 @@ fun SidebarMenu(onClose: () -> Unit) {
                         text = "Fahrul Keren",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(
+                                includeFontPadding = false
+                            )
+                        )
                     )
                     Text(
                         text = "Jacqueline",
                         color = Color(0xFFEE1D52),
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(
+                                includeFontPadding = false
+                            )
+                        )
                     )
                 }
             }
@@ -69,18 +81,38 @@ fun SidebarMenu(onClose: () -> Unit) {
             HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(text = "\uD83C\uDFE0 Home", color = Color.White, fontSize = 15.sp)
+            Text(
+                text = "\uD83C\uDFE0 Home",
+                color = Color.White, fontSize = 15.sp,
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(
+                       includeFontPadding = false
+                )   )
+            )
             Spacer(modifier = Modifier.height(12.dp))
-            Text(text = "⭐ Bookmarks", color = Color.White, fontSize = 15.sp)
+            Text(
+                text = "⭐ Bookmarks",
+                color = Color.White,
+                fontSize = 15.sp,
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(
+                        includeFontPadding = false
+                    )
+                )
+            )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "⚙\uFE0F Bookmarks",
                 color = Color.White,
                 fontSize = 15.sp,
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(
+                        includeFontPadding = false
+                    )
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onClose() }
-                    .padding(vertical = 8.dp)
             )
         }
     }
