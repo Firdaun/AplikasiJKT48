@@ -77,9 +77,9 @@ fun SidebarMenu(onClose: () -> Unit) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             Text(
                 text = "\uD83C\uDFE0 Home",
@@ -102,7 +102,7 @@ fun SidebarMenu(onClose: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "⚙\uFE0F Bookmarks",
+                text = "⚙\uFE0F Settings",
                 color = Color.White,
                 fontSize = 15.sp,
                 style = TextStyle(
